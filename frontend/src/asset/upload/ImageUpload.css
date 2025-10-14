@@ -1,0 +1,259 @@
+.websocket-status {
+  margin-bottom: 16px;
+  text-align: right;
+  height: 60px;
+}
+
+.websocket-status:deep(.el-icon ){
+  --el-icon-size:40px;
+}
+.websocket-tag {
+  height: 60px;
+  width: 200px;
+  font-size: 40px;
+  font-weight: bold;
+  line-height: 60px;
+  
+  /* 毛玻璃效果 */
+  background: rgba(255, 255, 255, 0.1);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  
+  /* 文字样式优化 */
+  color: rgba(255, 255, 255, 0.9);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  text-align: center;
+  
+  /* 过渡效果 */
+  transition: all 0.3s ease;
+}
+
+.websocket-tag:hover {
+  background: rgba(255, 255, 255, 0.15);
+  transform: translateY(-2px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+}
+.upload-area {
+  margin-bottom: 20px;
+  max-height: 700px; /* 改为最大高度 */
+  overflow-y: auto; /* 添加垂直滚动 */
+  overflow-x: hidden;
+  padding-right: 10px; /* 为滚动条留出空间 */
+}
+
+.upload-area::-webkit-scrollbar {
+  width: 8px;
+}
+
+.upload-area::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+}
+
+.upload-area::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 4px;
+}
+
+.upload-area::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.5);
+}
+.folder-input{
+    height: 90px;
+    font-size: 35px;
+}
+
+.folder-config :deep(.el-form-item__label) {
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 500;
+  margin-top: 20px;
+  font-size: 50px; /* 调整字体大小 */
+}
+
+.folder-input :deep(.el-input__wrapper) {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  -webkit-backdrop-filter: blur(5px);
+  backdrop-filter: blur(5px);
+  
+}
+
+.folder-preview {
+  margin-top: 8px;
+  padding: 8px 12px;
+  background: rgba(103, 194, 58, 0.1);
+  border: 1px solid rgba(103, 194, 58, 0.3);
+  border-radius: 8px;
+  font-size: 30px;
+  height: 50px;
+}
+
+/* 调整上传区域大小 */
+.upload-area :deep(.el-upload) {
+  width: 400px ;
+  height: 400px ;
+  background: rgba(255, 255, 255, 0.1) !important;
+  -webkit-backdrop-filter: blur(15px);
+  backdrop-filter: blur(15px);
+  border: 2px dashed rgba(255, 255, 255, 0.3) !important;
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.upload-area :deep(.el-upload:hover) {
+  background: rgba(255, 255, 255, 0.15) !important;
+  border-color: rgba(255, 255, 255, 0.5) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+}
+
+/* 上传图标样式 */
+.upload-area :deep(.el-upload .el-icon) {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 78px;
+  transition: all 0.3s ease;
+}
+
+.upload-area :deep(.el-upload:hover .el-icon) {
+  color: rgba(255, 255, 255, 1);
+  transform: scale(1.1);
+}
+
+/* 文件列表项大小调整 */
+.upload-area :deep(.el-upload-list--picture-card .el-upload-list__item) {
+  width: 400px ;
+  height: 400px ;
+  background: rgba(255, 255, 255, 0.1) !important;
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.upload-area :deep(.el-upload-list--picture-card .el-upload-list__item:hover) {
+  background: rgba(255, 255, 255, 0.15) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+}
+
+/* 文件列表项操作按钮 */
+.upload-area :deep(.el-upload-list__item-actions) {
+  background: rgba(0, 0, 0, 0.3) !important;
+  -webkit-backdrop-filter: blur(5px);
+  backdrop-filter: blur(5px);
+
+}
+
+.upload-area :deep(.el-upload-list__item-actions .el-icon) {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+/* 进度条样式 */
+.upload-area :deep(.el-progress-bar__outer) {
+  background: rgba(255, 255, 255, 0.2) !important;
+  -webkit-backdrop-filter: blur(5px);
+  backdrop-filter: blur(5px);
+  
+}
+
+.upload-area :deep(.el-progress-bar__inner) {
+  background: linear-gradient(90deg, rgba(103, 194, 58, 0.8), rgba(103, 194, 58, 1)) !important;
+}
+
+/* 上传操作按钮区域样式 */
+.upload-actions {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  margin-top: 24px;
+  padding: 20px;
+}
+
+/* 主要上传按钮样式 */
+.upload-actions :deep(.el-button--primary) {
+  background: rgba(64, 158, 255, 0.2) !important;
+  border: 1px solid rgba(64, 158, 255, 0.4) !important;
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  color: rgba(255, 255, 255, 0.95) !important;
+  font-size: 18px;
+  font-weight: 600;
+  padding: 16px 32px;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(64, 158, 255, 0.2);
+  transition: all 0.3s ease;
+  min-width: 180px;
+  height: 50px;
+}
+
+.upload-actions :deep(.el-button--primary:hover) {
+  background: rgba(64, 158, 255, 0.3) !important;
+  border-color: rgba(64, 158, 255, 0.6) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(64, 158, 255, 0.3);
+}
+
+.upload-actions :deep(.el-button--primary:active) {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(64, 158, 255, 0.2);
+}
+
+/* 禁用状态 */
+.upload-actions :deep(.el-button--primary:disabled) {
+  background: rgba(255, 255, 255, 0.1) !important;
+  border-color: rgba(255, 255, 255, 0.2) !important;
+  color: rgba(255, 255, 255, 0.4) !important;
+  transform: none;
+  box-shadow: none;
+}
+
+/* 次要按钮（清空列表）样式 */
+.upload-actions :deep(.el-button:not(.el-button--primary)) {
+  background: rgba(255, 255, 255, 0.1) !important;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  
+  color: rgba(255, 255, 255, 0.9) !important;
+  font-size: 16px;
+  font-weight: 500;
+  padding: 16px 24px;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  min-width: 120px;
+  height: 50px;
+}
+
+.upload-actions :deep(.el-button:not(.el-button--primary):hover) {
+  background: rgba(255, 255, 255, 0.2) !important;
+  border-color: rgba(255, 255, 255, 0.5) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+}
+
+.upload-actions :deep(.el-button:not(.el-button--primary):disabled) {
+  background: rgba(255, 255, 255, 0.05) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+  color: rgba(255, 255, 255, 0.3) !important;
+  transform: none;
+  box-shadow: none;
+}
+
+/* 加载状态样式 */
+.upload-actions :deep(.el-button.is-loading) {
+  background: rgba(64, 158, 255, 0.25) !important;
+  border-color: rgba(64, 158, 255, 0.5) !important;
+}
+
+/* 按钮图标样式 */
+.upload-actions :deep(.el-button .el-icon) {
+  font-size: 18px;
+  margin-right: 8px;
+}

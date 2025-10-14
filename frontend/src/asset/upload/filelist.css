@@ -1,0 +1,607 @@
+.file-list-container {
+  padding: 20px;
+  width: 99%;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.03);
+  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+.file-list {
+  height: 100%;
+  background: transparent;
+}
+.toolbar {
+  display: flex;
+  justify-content: space-between;
+  flex-direction: column;
+  padding: 20px 24px; /* 从 18px 24px 增加到 24px 28px */
+  background: rgba(255, 255, 255, 0.08);
+  -webkit-backdrop-filter: blur(15px);
+  backdrop-filter: blur(15px);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  margin-bottom: 24px;
+  gap: 24px; /* 从 20px 增加到 24px */
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+.header-title {
+  font-size: 40px; 
+  font-weight: 700; 
+  color: rgba(255, 255, 255, 0.95);
+  display: flex;
+  align-items: center;
+  gap: 16px; 
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  padding: 8px 0; 
+}
+.toolbar .header-title :deep(.el-icon) {
+  font-size: 40px; /* 增大图标尺寸 */  
+  color: rgba(64, 158, 255, 0.8);
+}
+
+.toolbar .header-actions :deep(.el-button) {
+  background: rgba(64, 158, 255, 0.2);
+  border: 1px solid rgba(64, 158, 255, 0.4);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  color: rgba(255, 255, 255, 0.95);
+  border-radius: 14px ;
+  transition: all 0.3s ease;
+  font-size: 30px ;
+  height: auto ;
+}
+.toolbar .header-actions :deep(.el-button:hover) {
+  background: rgba(64, 158, 255, 0.35) !important;
+  border-color: rgba(64, 158, 255, 0.6) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(64, 158, 255, 0.3);
+}
+.toolbar .header-actions :deep(.el-button:active) {
+  transform: translateY(0);
+}
+.toolbar .header-actions :deep(.el-button.is-loading) {
+  background: rgba(64, 158, 255, 0.15) !important;
+  border-color: rgba(64, 158, 255, 0.3) !important;
+}
+.toolbar:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.toolbar-top,.toolbar-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.toolbar-left, .toolbar-right {
+  display: flex;
+  align-items: center;
+  gap: 25px; 
+  height: 100px;
+}
+.toolbar-left :deep(.el-select) {  /* ✅ 控制整个选择框的高度 */
+  width: 400px;
+  font-size: 40px !important;          /* ✅ 放大字体 */
+}
+
+
+.filter-option{
+  font-size: 30px;
+  height: 50px;
+}
+/* 输入框样式 */
+.toolbar-right :deep(.el-input .el-input__inner) {
+  height: 42px;
+  line-height: 42px;
+  font-size: 16px;
+  padding: 0 16px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  color: rgba(255, 255, 255, 0.9) ;
+  border-radius: 8px ;
+}
+.toolbar-bottom .toolbar-left :deep(.el-option){
+  height: 100px;
+}
+/* 按钮组样式 */
+.toolbar-left :deep(.el-button), .toolbar-right :deep(.el-button) {
+  height: 42px ; /* 增加按钮高度 */
+  padding: 0 20px ; /* 增加内边距 */
+  font-size: 16px ;
+  background: rgba(255, 255, 255, 0.1) ;
+  border: 1px solid rgba(255, 255, 255, 0.2) ;
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  color: rgba(255, 255, 255, 0.9) ;
+  border-radius: 8px ;
+  transition: all 0.3s ease;
+}
+
+.toolbar-left :deep(.el-button:hover),
+.toolbar-right :deep(.el-button:hover) {
+  background: rgba(255, 255, 255, 0.2) ;
+  border-color: rgba(255, 255, 255, 0.4) ;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* 按钮组中的图标 */
+.toolbar-left :deep(.el-button .el-icon),
+.toolbar-right :deep(.el-button .el-icon) {
+  font-size: 30px !important;
+}
+
+/* 主要按钮样式 */
+.toolbar-right :deep(.el-button--primary) {
+  background: rgba(64, 158, 255, 0.2) ;
+  border-color: rgba(64, 158, 255, 0.4) ;
+}
+
+.toolbar-right :deep(.el-button--primary:hover) {
+  background: rgba(64, 158, 255, 0.3) ;
+  border-color: rgba(64, 158, 255, 0.6);
+}
+
+.file-content {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+}
+
+.file-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 24px;
+  padding: 24px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+/* 文件卡片样式 - 覆盖 FileCard.vue 的默认样式 */
+.file-grid :deep(.file-card) {
+  background: rgba(255, 255, 255, 0.08) !important;
+  -webkit-backdrop-filter: blur(15px) !important;
+  backdrop-filter: blur(15px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  border-radius: 16px !important;
+  padding: 20px !important;
+  transition: all 0.3s ease !important;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1) !important;
+  min-height: 200px;
+}
+
+.file-grid :deep(.file-card:hover) {
+  background: rgba(255, 255, 255, 0.12) !important;
+  border-color: rgba(255, 255, 255, 0.25) !important;
+  transform: translateY(-6px) !important;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15) !important;
+}
+
+.file-grid :deep(.file-card.selected) {
+  background: rgba(64, 158, 255, 0.15) !important;
+  border-color: rgba(64, 158, 255, 0.4) !important;
+  box-shadow: 0 8px 24px rgba(64, 158, 255, 0.2) !important;
+}
+
+/* 文件图标容器 */
+.file-grid :deep(.file-icon-container) {
+  margin-bottom: 16px;
+}
+
+.file-grid :deep(.file-icon) {
+  font-size: 64px !important;
+}
+
+/* 文件夹标签样式 */
+.file-grid :deep(.folder-badge .folder-type-tag) {
+  background: rgba(103, 194, 58, 0.2) !important;
+  border: 1px solid rgba(103, 194, 58, 0.4) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
+  backdrop-filter: blur(8px) !important;
+  color: rgba(255, 255, 255, 0.9) !important;
+  font-size: 12px !important;
+  padding: 4px 8px !important;
+  border-radius: 6px !important;
+}
+
+/* 图片数量标识 */
+.file-grid :deep(.image-count-badge) {
+  background: rgba(64, 158, 255, 0.8) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
+  backdrop-filter: blur(8px) !important;
+  border: 1px solid rgba(64, 158, 255, 0.6) !important;
+  color: rgba(255, 255, 255, 0.95) !important;
+  font-size: 12px !important;
+  padding: 4px 8px !important;
+  border-radius: 12px !important;
+}
+
+/* 文件信息样式 */
+.file-grid :deep(.file-name) {
+  color: rgba(255, 255, 255, 0.95) !important;
+  font-weight: 600 !important;
+  font-size: 16px !important;
+  margin-bottom: 8px !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.file-grid :deep(.file-meta) {
+  color: rgba(255, 255, 255, 0.7) !important;
+  font-size: 13px !important;
+  gap: 4px !important;
+}
+
+/* 卡片操作按钮 */
+.file-grid :deep(.card-actions .el-button) {
+  background: rgba(255, 255, 255, 0.1) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
+  color: rgba(255, 255, 255, 0.9) !important;
+  border-radius: 6px !important;
+  transition: all 0.3s ease !important;
+  padding: 6px !important;
+}
+
+.file-grid :deep(.card-actions .el-button:hover) {
+  background: rgba(255, 255, 255, 0.2) !important;
+  border-color: rgba(255, 255, 255, 0.4) !important;
+  transform: scale(1.1) !important;
+}
+
+.empty-icon {
+  font-size: 100px;
+  color: rgba(255, 255, 255, 0.3);
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.file-name-cell {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.file-name {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 500;
+  font-size: 15px;
+}
+
+.image-count {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: rgba(64, 158, 255, 0.9);
+  background: rgba(64, 158, 255, 0.1);
+  padding: 6px 12px;
+  border-radius: 8px;
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  font-size: 14px;
+  border: 1px solid rgba(64, 158, 255, 0.2);
+}
+
+.table-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.table-actions :deep(.el-button) {
+  background: rgba(255, 255, 255, 0.1) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-radius: 6px;
+  transition: all 0.3s ease;
+  font-size: 13px !important;
+  padding: 8px 12px !important;
+}
+
+.table-actions :deep(.el-button:hover) {
+  background: rgba(255, 255, 255, 0.2) !important;
+  transform: scale(1.05);
+}
+
+:deep(.selected-row) {
+  background-color: rgba(64, 158, 255, 0.15) !important;
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  
+}
+
+:deep(.el-table__row:hover) {
+  background-color: rgba(255, 255, 255, 0.08) !important;
+  -webkit-backdrop-filter: blur(5px);
+  backdrop-filter: blur(5px);
+  
+}
+
+.toolbar :deep(.el-table) {
+  background: rgba(255, 255, 255, 0.02) !important;
+  -webkit-backdrop-filter: blur(15px);
+  backdrop-filter: blur(15px);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.95) !important;
+  overflow: hidden;
+  font-size: 14px !important;
+}
+
+
+/* 表格整体样式 */
+:deep(.el-table) {
+  background: rgba(255, 255, 255, 0.05) !important;
+  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: rgba(255, 255, 255, 0.95) !important;
+  overflow: hidden;
+  font-size: 16px !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+/* 表格头部样式 */
+:deep(.el-table__header-wrapper) {
+  background: rgba(255, 255, 255, 0.08) !important;
+  -webkit-backdrop-filter: blur(15px);
+  backdrop-filter: blur(15px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+:deep(.el-table__header) {
+  background: transparent !important;
+}
+
+:deep(.el-table th) {
+  background: transparent !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+  color: rgba(255, 255, 255, 0.9) !important;
+  font-weight: 600 !important;
+  font-size: 16px !important;
+  padding: 16px 12px !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+:deep(.el-table th.el-table__cell) {
+  background: transparent !important;
+}
+
+/* 表格主体样式 */
+:deep(.el-table__body-wrapper) {
+  background: transparent !important;
+}
+
+:deep(.el-table__body) {
+  background: transparent !important;
+}
+
+:deep(.el-table td) {
+  background: transparent !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+  color: rgba(255, 255, 255, 0.85) !important;
+  font-size: 15px !important;
+  padding: 14px 12px !important;
+  transition: all 0.3s ease;
+}
+
+/* 表格行样式 */
+:deep(.el-table__row) {
+  background: transparent !important;
+  transition: all 0.3s ease;
+}
+
+:deep(.el-table__row:hover) {
+  background: rgba(255, 255, 255, 0.1) !important;
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+:deep(.selected-row) {
+  background: rgba(64, 158, 255, 0.2) !important;
+  -webkit-backdrop-filter: blur(15px);
+  backdrop-filter: blur(15px);
+  border: 1px solid rgba(64, 158, 255, 0.3);
+  box-shadow: 0 4px 20px rgba(64, 158, 255, 0.2);
+}
+
+:deep(.selected-row:hover) {
+  background: rgba(64, 158, 255, 0.25) !important;
+}
+
+/* 表格内的标签样式 */
+:deep(.el-table .el-tag) {
+  background: rgba(255, 255, 255, 0.1) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  color: rgba(255, 255, 255, 0.9) !important;
+  border-radius: 8px !important;
+  font-size: 12px !important;
+  padding: 4px 8px !important;
+  font-weight: 500;
+}
+
+:deep(.el-table .el-tag--primary) {
+  background: rgba(64, 158, 255, 0.2) !important;
+  border-color: rgba(64, 158, 255, 0.4) !important;
+  color: rgba(255, 255, 255, 0.95) !important;
+}
+
+:deep(.el-table .el-tag--success) {
+  background: rgba(103, 194, 58, 0.2) !important;
+  border-color: rgba(103, 194, 58, 0.4) !important;
+  color: rgba(255, 255, 255, 0.95) !important;
+}
+
+:deep(.el-table .el-tag--info) {
+  background: rgba(144, 147, 153, 0.2) !important;
+  border-color: rgba(144, 147, 153, 0.4) !important;
+  color: rgba(255, 255, 255, 0.9) !important;
+}
+
+/* 文件名单元格样式 */
+.file-name-cell {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.file-name {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: rgba(255, 255, 255, 0.95);
+  font-weight: 600;
+  font-size: 15px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+/* 图片数量显示样式 */
+.image-count {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: rgba(64, 158, 255, 0.95);
+  background: rgba(64, 158, 255, 0.15);
+  padding: 6px 12px;
+  border-radius: 10px;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  font-size: 14px;
+  border: 1px solid rgba(64, 158, 255, 0.3);
+  font-weight: 500;
+}
+
+/* 表格操作按钮样式 */
+.table-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.table-actions :deep(.el-button) {
+  background: rgba(255, 255, 255, 0.1) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  font-size: 14px !important;
+  padding: 8px !important;
+  min-width: 36px;
+  height: 36px;
+}
+
+.table-actions :deep(.el-button:hover) {
+  background: rgba(255, 255, 255, 0.2) !important;
+  border-color: rgba(255, 255, 255, 0.4) !important;
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.table-actions :deep(.el-button--primary) {
+  background: rgba(64, 158, 255, 0.2) !important;
+  border-color: rgba(64, 158, 255, 0.4) !important;
+  color: rgba(255, 255, 255, 0.95) !important;
+}
+
+.table-actions :deep(.el-button--primary:hover) {
+  background: rgba(64, 158, 255, 0.3) !important;
+  border-color: rgba(64, 158, 255, 0.6) !important;
+  box-shadow: 0 4px 16px rgba(64, 158, 255, 0.3);
+}
+
+.table-actions :deep(.el-button--danger) {
+  background: rgba(245, 108, 108, 0.2) !important;
+  border-color: rgba(245, 108, 108, 0.4) !important;
+  color: rgba(255, 255, 255, 0.95) !important;
+}
+
+.table-actions :deep(.el-button--danger:hover) {
+  background: rgba(245, 108, 108, 0.3) !important;
+  border-color: rgba(245, 108, 108, 0.6) !important;
+  box-shadow: 0 4px 16px rgba(245, 108, 108, 0.3);
+}
+
+/* 表格图标样式 */
+:deep(.el-table .el-icon) {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 18px;
+}
+
+/* 表格滚动条样式 */
+:deep(.el-table__body-wrapper)::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+:deep(.el-table__body-wrapper)::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 4px;
+}
+
+:deep(.el-table__body-wrapper)::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+}
+
+:deep(.el-table__body-wrapper)::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* 表格空状态样式 */
+:deep(.el-table__empty-block) {
+  background: transparent !important;
+  color: rgba(255, 255, 255, 0.6) !important;
+}
+
+:deep(.el-table__empty-text) {
+  color: rgba(255, 255, 255, 0.6) !important;
+  font-size: 16px;
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+  :deep(.el-table) {
+    font-size: 14px !important;
+  }
+  
+  :deep(.el-table th) {
+    font-size: 14px !important;
+    padding: 12px 8px !important;
+  }
+  
+  :deep(.el-table td) {
+    font-size: 13px !important;
+    padding: 10px 8px !important;
+  }
+  
+  .table-actions :deep(.el-button) {
+    font-size: 12px !important;
+    padding: 6px !important;
+    min-width: 32px;
+    height: 32px;
+  }
+}

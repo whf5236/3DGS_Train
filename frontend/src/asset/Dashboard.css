@@ -1,0 +1,148 @@
+.dashboard {
+  height: 100vh;
+  color: #fff;
+}
+.dashboard-main, .dashboard-aside {
+  padding: 0;
+}
+.dashboard-container-main {
+  background: rgba(30, 41, 59, 0.5); 
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px); 
+  border-radius: 12px;
+  padding: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  min-height: calc(100vh - 120px);
+}
+.dashboard-container-aside {
+  background: rgba(30, 41, 59, 0.5); 
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px); 
+  border-radius: 12px;
+  padding: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  min-height: calc(100vh - 120px);
+}
+.layout-container .el-aside {
+  width: 20%;
+}
+.layout-container .el-main {
+  width: 70%;
+}
+
+.layout-container :deep(.el-menu) {
+  border-right: none !important;
+  background: transparent !important;
+}
+
+:deep(.el-menu-item) {
+  background-color: transparent !important;
+  color: #fff !important;
+  height: 80px;
+  line-height: 75px;
+  font-size: 40px;
+  text-align: center;
+}
+:deep(.el-menu-item:hover) {
+  background-color: rgba(64, 158, 255, 0.3) !important;
+  color: aqua;
+}
+:deep(.el-menu-item.is-active) {
+  background-color: rgba(64, 158, 255, 0.5) !important;
+  color: #fff !important;
+}
+:deep(.el-menu-item-group__title) {
+  background: transparent !important;
+  color: #909399;
+  font-size: 30px;
+  padding: 7px 0 7px 20px;
+}
+:deep(.el-sub-menu__title:hover) {
+  background: rgba(64, 158, 255, 0.3) !important;
+  transform: translateX(4px) !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 8px rgba(64, 158, 255, 0.2) !important;
+}
+:deep(.el-menu--inline) { /* 展开后的子菜单容器 */
+  background: transparent !important;
+}
+:deep(.el-sub-menu.is-opened > .el-sub-menu__title) {
+  background: transparent !important;
+}
+/* 标题行的排版（图标+文字水平居中对齐） */
+.menu-title-content {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+/* 文本大小（按需改数值） */
+.menu-text {
+  font-size: 70px;   /* 你要的字号，例如 18、20、24 */
+  font-weight: 600;  /* 可选：加粗 */
+  line-height: 1;    /* 防止文字过高 */
+  
+}
+/* 图标大小（因为 <style scoped>，使用 :deep 穿透） */
+:deep(.menu-icon) {
+  font-size: 58px;   /* 你要的图标大小，例如 20、22、24 */
+}
+
+/* 若需要整体标题行更高，可设置如下（可选） */
+:deep(.el-sub-menu__title) {
+  height: 150px;
+  line-height: 75px;
+  color: #ffffff !important;
+}
+
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+  .layout-container .el-aside {
+    width: 100% !important;
+  }
+  
+  .layout-container .el-main {
+    width: 100% !important;
+  }
+  
+  .dashboard-container-aside {
+    margin: 8px !important;
+    padding: 16px !important;
+  }
+}
+
+
+/* ===== 布局优化：顶部两列 + 底部列表 ===== */
+.dashboard-upload-and-list .top-section {
+  margin-bottom: 16px;
+  /* align-items: stretch; */
+}
+.dashboard-upload-and-list .bottom-section {
+  margin-top: 12px;
+}
+
+/* 顶部两列等高，内部内容自动拉伸填满 */
+.dashboard-upload-and-list .top-section .el-col {
+  display: flex;
+}
+.dashboard-upload-and-list .top-section .el-col > * {
+  flex: 1;
+  min-height: 360px;
+}
+
+/* 容器不溢出，滚动更平滑 */
+.dashboard-container-main {
+  box-sizing: border-box;
+  overflow: auto;
+}
+
+/* 收紧通用行间距，避免左右溢出 */
+.el-row {
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+}
+
+
+
