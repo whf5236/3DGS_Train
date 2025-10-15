@@ -42,11 +42,11 @@
               
               <el-menu-item index="2-1">
                 <el-icon><List /></el-icon>
-                文件列表
+                点云处理
               </el-menu-item>
               <el-menu-item index="2-2">
                 <el-icon><Search /></el-icon>
-                文件搜索
+                训练处理
               </el-menu-item>
             </el-menu-item-group>
             <el-menu-item-group title="文件处理">
@@ -107,6 +107,7 @@ import VideoUpload from './FileUpload/VideoUpload.vue'
 import FileList from './FileUpload/FileList.vue'
 import FolderUpload from './FileUpload/FolderUpload.vue'
 import SplatUpload from './FileUpload/SplatUpload.vue'
+import PointCloudProcessor from './Progress/PointCloudProcessor.vue'
 const activeIndex = ref('1-1')
 
 // 菜单选择事件处理
@@ -136,7 +137,8 @@ const mainComponent = computed(() => {
   if (idx.startsWith('2-')) {
     switch (idx) {
       case '2-1':
-        return markRaw(FileList)
+        return markRaw(PointCloudProcessor)
+      case '2-2':
       default:
         return null
     }

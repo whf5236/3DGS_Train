@@ -185,7 +185,8 @@ import {
   Setting,
   Folder,
 } from '@element-plus/icons-vue'
-import { ElCard, ElInput, ElButton, ElTag, ElProgress,ElRow,ElCol,ElIcon } from 'element-plus'
+import { ElCard, ElInput, ElButton, ElTag, ElProgress,
+  ElRow,ElCol,ElIcon,ElUpload, } from 'element-plus'
 import { useVideoUpload } from '@/composables/useUpload/useVideoUpload'
 import FilePreview from './FilePreview.vue'
 
@@ -204,7 +205,7 @@ const {
   removeFile,
   clearFiles,
   convertToPreviewFormat,
-  
+
   handleSelectFile,
   getFileExtension,
   formatFileSize,

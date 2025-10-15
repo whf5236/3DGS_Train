@@ -220,15 +220,6 @@
         </div>
       </el-col>
 
-      <!-- 右侧：文件预览区域 -->
-      <el-col :span="12">
-        <PointcloudPreview
-          :selected-file="selectedFile"
-          :file-list="previewFileList"
-          :pointcloud-type="pointcloudType"
-          @select-file="handleSelectFile"
-        />
-      </el-col>
     </el-row>
 
     <!-- 上传进度显示 -->
@@ -324,7 +315,6 @@ import {
 import type { UploadProps, UploadUserFile, UploadRawFile } from 'element-plus'
 import { useUserStore } from '@/stores/userStore'
 import { api } from '@/api'
-import PointcloudPreview from './PointcloudPreview.vue'
 
 // 点云类型
 const pointcloudType = ref<'gaussian' | 'standard' | 'lidar' | 'mesh' | 'colmap'>('gaussian')

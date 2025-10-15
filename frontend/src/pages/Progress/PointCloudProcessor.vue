@@ -260,8 +260,6 @@
 
 <script setup lang="ts" name="PointCloudProcess">
 import { computed, onMounted, onBeforeUnmount } from 'vue'
-import { useRouter } from 'vue-router'
-import { ElMessage } from 'element-plus'
 import { usePointCloudStore } from '@/stores/pointCloudStore'
 import { 
   Folder, 
@@ -275,7 +273,6 @@ import {
 
 // 使用 Pinia store
 const pointCloudStore = usePointCloudStore()
-const router = useRouter()
 
 // 计算属性
 const loading = computed(() => pointCloudStore.loading)
@@ -390,6 +387,6 @@ const formatFileSize = (bytes: number): string => {
 }
 </script>
 
-<style scoped src="../assets/styles/pointCloudProcessor.css">
+<style scoped src="../../asset/porgress/pointCloudProcessor.css">
 
 </style>

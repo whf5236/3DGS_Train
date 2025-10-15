@@ -297,7 +297,8 @@
 
 <script setup lang="ts" name="Preview">
 import { ref, computed, watch } from 'vue'
-import { ElMessage } from 'element-plus'
+import { ElMessage,ElCard,ElDescriptions,
+  ElDescriptionsItem,ElTag,ElSlider,ElButton,ElCheckbox } from 'element-plus'
 import {
   View,
   Document,
@@ -366,7 +367,7 @@ const {
   // Template refs
   imagePreviewContainer,
   previewImage,
-  
+
   // State
   loading,
   loadError,

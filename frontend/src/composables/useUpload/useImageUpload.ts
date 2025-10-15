@@ -35,7 +35,6 @@ export function useImageUpload() {
   const fileList = ref<UploadUserFile[]>([])
   const selectedFile = ref<PreviewFile | null>(null)
   const uploading = ref(false)
-  const showWebSocketStatus = ref(true)
   const dialogImageUrl = ref('')
   const dialogVisible = ref(false)
 
@@ -261,7 +260,6 @@ export function useImageUpload() {
     fileList,
     selectedFile,
     uploading,
-    showWebSocketStatus,
     dialogImageUrl,
     dialogVisible,
     uploadConfig,
