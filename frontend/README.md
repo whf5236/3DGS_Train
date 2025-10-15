@@ -1,10 +1,10 @@
-# 3dgs
+# 3dgs-train
 
-This template should help get you started developing with Vue 3 in Vite.
+3dgs的训练平台可从前端网页上传，然后进行训练。
 
 ## Recommended IDE Setup
 
-[VS Code](https://code.visualstudio.com/) + [Vue (Official)](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
+
 
 ## Recommended Browser Setup
 
