@@ -69,6 +69,7 @@
 
 <script setup lang="ts">
 import { Picture, Histogram, Delete } from '@element-plus/icons-vue'
+import { ElIcon,ElButton,ElTag } from 'element-plus'
 import FileIcon from './FileIcon.vue'
 
 interface Props {

@@ -25,7 +25,6 @@ class ConnectionManager:
             self.active_connections.remove(websocket)
         if user_id and user_id in self.user_connections:
             del self.user_connections[user_id]
-        print(f"WebSocket连接已断开，当前连接数: {len(self.active_connections)}")
         
     async def send_personal_message(self, message: str, websocket: WebSocket):
         """发送个人消息"""

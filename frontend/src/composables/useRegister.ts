@@ -5,7 +5,6 @@ import { useUserStore } from "@/stores/userStore";
 export function useRegister() { 
     const router = useRouter()
     const userStore = useUserStore()
-
     // 状态
     const username = ref("");
     const password = ref("");

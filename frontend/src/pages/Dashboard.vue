@@ -99,31 +99,15 @@
 import { ref, computed, markRaw } from 'vue'
 import { 
   Upload, Picture, VideoPlay, Document, Folder, List, Search, 
-  Operation, Setting, User, Tools, View, Warning, Box, Connection, Files
-} from '@element-plus/icons-vue'
+  Operation, Setting, User, Tools, Box, } from '@element-plus/icons-vue'
+import { ElContainer, ElAside, ElMain, ElMenu, ElMenuItem, 
+  ElMenuItemGroup,ElIcon, ElSubMenu, ElScrollbar,  } from 'element-plus'
 import ImageUpload from './FileUpload/ImageUpload.vue'
 import VideoUpload from './FileUpload/VideoUpload.vue'
 import FileList from './FileUpload/FileList.vue'
 import FolderUpload from './FileUpload/FolderUpload.vue'
 import SplatUpload from './FileUpload/SplatUpload.vue'
 const activeIndex = ref('1-1')
-
-// 获取当前页面标题
-const getCurrentTitle = () => {
-  const titleMap: Record<string, string> = {
-    '1-1': '图片上传',
-    '1-2': '视频上传', 
-    '1-3': '压缩包&文件夹上传',
-    '1-4': '点云文件上传',
-    '1-6': 'Colmap文件上传',
-    '2-1': '文件列表',
-    '2-2': '文件搜索',
-    '2-3': '批量处理',
-    '3-1': '个人资料',
-    '3-2': '偏好设置'
-  }
-  return titleMap[activeIndex.value] || '未知页面'
-}
 
 // 菜单选择事件处理
 function onMenuSelect(index: string) {

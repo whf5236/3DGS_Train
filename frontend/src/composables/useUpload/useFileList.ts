@@ -9,7 +9,6 @@ export interface FileListProps {
   showPreview?: boolean
 }
 
-// 定义 Emits 类型 - 修改为与 Vue 3 defineEmits 兼容的类型
 export type FileListEmits = {
   'file-selected': [file: any]
   'preview-file': [file: any]

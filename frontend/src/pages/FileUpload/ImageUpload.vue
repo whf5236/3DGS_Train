@@ -1,19 +1,5 @@
 <template>
   <div class="image-upload">
-    <!-- WebSocket状态指示器 -->
-    <div class="websocket-status" v-if="showWebSocketStatus">
-      <el-tag 
-        class="websocket-tag"
-        :type="isConnected ? 'success' : 'danger'" 
-        size="large"
-      >
-        <el-icon>
-          <Connection v-if="isConnected" />
-          <Close v-else />
-        </el-icon>
-        {{ isConnected ? '已连接' : '未连接' }}
-      </el-tag>
-    </div>
     <!-- 上传区域 -->
     <div class="upload-area">
       <!-- 文件夹配置 -->
@@ -89,7 +75,7 @@
         
         <el-progress 
           :percentage="uploadProgress.percentage" 
-          :status="uploadProgress.status"
+          :status="uploadProgress.status === 'info' ? undefined : uploadProgress.status"
           :stroke-width="8"
         />
         
@@ -115,7 +101,10 @@
 </template>
 
 <script setup lang="ts" name="ImageUpload">
-import { UploadFilled, Plus, Connection, Close, Folder } from '@element-plus/icons-vue'
+import { UploadFilled, Plus, Folder } from '@element-plus/icons-vue'
+import { ElForm, ElFormItem, ElInput, ElButton, ElTag,
+  ElProgress, ElDialog, ElCard, ElIcon, ElUpload } from 'element-plus'
+
 import { useImageUpload } from '@/composables/useUpload/useImageUpload'
 import FileList from './FileList.vue'
 
@@ -125,14 +114,12 @@ const {
   fileList,
   selectedFile,
   uploading,
-  showWebSocketStatus,
   dialogImageUrl,
   dialogVisible,
   uploadConfig,
   uploadProgress,
   // 计算属性
   username,
-  isConnected,
   
   // 方法
   uploadFiles,

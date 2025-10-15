@@ -243,7 +243,9 @@ import {
   Histogram,
   Delete,
 } from '@element-plus/icons-vue'
-
+import { ElTableColumn,ElTable,ElButton,ElTag,
+  ElEmpty,ElIcon,ElResult,ElSkeleton,ElButtonGroup,
+  ElSelect,ElOption,ElInput,ElDivider } from 'element-plus'
 import FileCard from './components/FileCard.vue'
 import FileIcon from './components/FileIcon.vue'
 import { useFileListComponent, type FileListProps } from '@/composables/useUpload/useFileList'

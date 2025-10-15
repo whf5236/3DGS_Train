@@ -79,7 +79,7 @@
               v-for="file in fileList"
               :key="file.uid"
               :class="['file-item', { selected: selectedFile?.uid === file.uid }]"
-              @click="handleSelectFile(convertToPreviewFormat(file))"
+              @click="() => { const previewFile = convertToPreviewFormat(file); if (previewFile) handleSelectFile(previewFile); }"
             >
               <div class="file-content">
                 <div class="file-icon">
@@ -177,8 +177,6 @@
 </template>
 
 <script setup lang="ts" name="VideoUpload">
-import { ref, computed } from 'vue'
-import { ElMessage } from 'element-plus'
 import {
   UploadFilled,
   Delete,
@@ -187,202 +185,31 @@ import {
   Setting,
   Folder,
 } from '@element-plus/icons-vue'
-import type { UploadProps, UploadUserFile, UploadRawFile } from 'element-plus'
-import { useUserStore } from '@/stores/userStore'
-import { api } from '@/api'
-import { reactive } from 'vue'
+import { ElCard, ElInput, ElButton, ElTag, ElProgress,ElRow,ElCol,ElIcon } from 'element-plus'
+import { useVideoUpload } from '@/composables/useUpload/useVideoUpload'
 import FilePreview from './FilePreview.vue'
 
-const fileList = ref<UploadUserFile[]>([])
-const selectedFile = ref<any>(null)
-
-// 帧率提取相关配置
-const frameRate = ref(5) // 默认5fps
-const extractAllFrames = ref(false)
-const userStore = useUserStore()
-const username = computed(() => userStore.user?.username || '')
-const folderName = ref('')
-const uploading = ref(false)
-// 上传进度
-const uploadProgress = reactive({
-  show: false,
-  percentage: 0,
-  completed: 0,
-  total: 0,
-  status: 'info' as 'info' | 'success' | 'warning' | 'exception',
-  targetFolder: '',
-  currentFile: '',
-  frameExtractionStatus: ''
-})
-
-const beforeUpload = (rawFile: UploadRawFile) => {
-  // 检查文件大小
-  const maxSize = 500 * 1024 * 1024 // 500MB
-  if (rawFile.size > maxSize) {
-    ElMessage.error('文件大小不能超过 500MB')
-    return false
-  }
+// 使用 composable
+const {
+  fileList,
+  selectedFile,
+  frameRate,
+  extractAllFrames,
+  folderName,
+  uploading,
+  uploadProgress,
+  previewFileList,
+  beforeUpload,
+  handleFileChange,
+  removeFile,
+  clearFiles,
+  convertToPreviewFormat,
   
-  // 检查文件类型
-  const allowedTypes = ['mp4', 'webm', 'ogg', 'avi', 'mov', 'mkv']
-  const fileExtension = rawFile.name.split('.').pop()?.toLowerCase()
-  
-  if (!fileExtension || !allowedTypes.includes(fileExtension)) {
-    ElMessage.error(`不支持的视频格式: ${fileExtension}。支持的格式: ${allowedTypes.join(', ')}`)
-    return false
-  }
-  
-  return true
-}
-
-const handleFileChange: UploadProps['onChange'] = (uploadFile, uploadFiles) => {
-  // 验证文件类型
-  if (uploadFile.raw) {
-    const allowedTypes = ['mp4', 'webm', 'ogg', 'avi', 'mov', 'mkv']
-    const fileExtension = uploadFile.name?.split('.').pop()?.toLowerCase()
-    
-    if (!fileExtension || !allowedTypes.includes(fileExtension)) {
-      ElMessage.error(`不支持的视频格式: ${fileExtension}。支持的格式: ${allowedTypes.join(', ')}`)
-      return
-    }
-  }
-  
-  fileList.value = uploadFiles
-  if (uploadFile.raw) {
-    selectedFile.value = convertToPreviewFormat(uploadFile)
-  }
-}
-
-const removeFile = (file: UploadUserFile) => {
-  const index = fileList.value.findIndex(f => f.uid === file.uid)
-  if (index > -1) {
-    fileList.value.splice(index, 1)
-    // 如果删除的是当前选中的文件，清空选中状态
-    if (selectedFile.value && selectedFile.value.uid === file.uid) {
-      selectedFile.value = null
-    }
-  }
-}
-
-const clearFiles = () => {
-  fileList.value = []
-  selectedFile.value = null
-}
-
-// 转换文件格式以适配 FilePreview 组件
-const convertToPreviewFormat = (uploadFile: UploadUserFile) => {
-  if (!uploadFile.raw) return null
-  
-  const file = uploadFile.raw
-  const fileExtension = file.name.split('.').pop()?.toLowerCase() || ''
-  
-  return {
-    filename: file.name,
-    type: fileExtension,
-    size: file.size,
-    path: uploadFile.url || URL.createObjectURL(file),
-    uid: uploadFile.uid
-  }
-}
-
-// 为 FilePreview 组件准备文件列表
-const previewFileList = computed(() => {
-  return fileList.value
-    .filter(file => file.raw)
-    .map(file => convertToPreviewFormat(file))
-    .filter(file => file !== null)
-})
-
-const handleSelectFile = (file: any) => {
-  selectedFile.value = file
-}
-
-const getFileExtension = (filename: string) => {
-  return filename.split('.').pop()?.toLowerCase() || ''
-}
-
-const formatFileSize = (bytes: number) => {
-  if (bytes === 0) return '0 Bytes'
-  const k = 1024
-  const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB']
-  const i = Math.floor(Math.log(bytes) / Math.log(k))
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
-}
-
-
-async function submitUpload() {
-  if (!username.value) {
-    ElMessage.error('请先登录，无法获取用户名')
-    return
-  }
-  if (!fileList.value.length) {
-    ElMessage.warning('请先选择至少一个视频文件')
-    return
-  }
-
-  const form = new FormData()
-  form.append('username', username.value)
-  
-  // 添加帧率提取参数
-  if (extractAllFrames.value) {
-    form.append('extract_all_frames', 'true')
-  } else {
-    form.append('frame_rate', frameRate.value.toString())
-  }
-  
-  if (folderName.value && folderName.value.trim()) {
-    form.append('folder_name', folderName.value.trim())
-  }
-  
-  for (const f of fileList.value) {
-    if (f.raw) form.append('files', f.raw, f.name)
-  }
-
-  try {
-    uploading.value = true
-    uploadProgress.show = true
-    uploadProgress.percentage = 0
-    uploadProgress.status = 'info'
-    uploadProgress.total = fileList.value.length
-    uploadProgress.completed = 0
-    uploadProgress.frameExtractionStatus = '准备开始处理...'
-
-    // 使用新的带帧提取功能的API端点
-    const endpoint = fileList.value.length === 1 
-      ? '/upload/videos_with_frame_extraction' 
-      : '/upload/batch_videos_with_frame_extraction'
-
-    const res = await api.post(endpoint, form, {
-      headers: { 'Content-Type': 'multipart/form-data' },
-      onUploadProgress: (progressEvent) => {
-        if (progressEvent.total) {
-          uploadProgress.percentage = Math.round((progressEvent.loaded * 100) / progressEvent.total)
-        }
-      }
-    })
-
-    uploadProgress.status = 'success'
-    uploadProgress.percentage = 100
-    uploadProgress.completed = fileList.value.length
-    uploadProgress.frameExtractionStatus = '帧提取完成'
-    uploadProgress.targetFolder = res.data.folder_name
-
-    ElMessage.success(`视频上传并帧提取成功：保存至 ${res.data.folder_name}`)
-    // 清空列表与自定义名称
-    fileList.value = []
-    selectedFile.value = null
-  } catch (e: any) {
-    uploadProgress.status = 'exception'
-    const msg = e?.response?.data?.detail || e?.message || '视频处理失败'
-    ElMessage.error(msg)
-  } finally {
-    uploading.value = false
-    // 3秒后隐藏进度条
-    setTimeout(() => {
-      uploadProgress.show = false
-    }, 3000)
-  }
-}
+  handleSelectFile,
+  getFileExtension,
+  formatFileSize,
+  submitUpload
+} = useVideoUpload()
 </script>
 
 <style scoped src="../../asset/upload/videoUpload.css">

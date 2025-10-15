@@ -330,7 +330,6 @@ export function useFilePreview(props: Ref<FilePreviewProps>, emit: (event: 'sele
   })
 
   return {
-    // Template refs
     imagePreviewContainer,
     previewImage,
     

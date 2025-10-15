@@ -28,13 +28,6 @@ const router = createRouter({
             requiresAuth:true
         }
     },
-    // {
-    //     path:'/profile',
-    //     component:()=>import('@/pages/Profile.vue'),
-    //     meta:{
-    //         requiresAuth:true
-    //     }
-    // }
 ]
 }
 
@@ -42,10 +35,7 @@ const router = createRouter({
 // 创建路由实例，配置路由历史模式为html
 
 // 全局前置守卫，控制路由跳转时候的权限验证
-// to: 即将要进入的目标路由对象
-// from: 当前导航正要离开的路由对象
-// next: 一个函数，表示放行，调用该方法，会跳转到下一个匹配的路由，如果没有匹配的路由，则不会进行跳转
-// userStore: 获取用户的状态管理实例，用于检查用户的认证状态
+
 router.beforeEach((to, from, next) =>{
     const userStore = useUserStore()
     if(to.meta.requiresAuth && !userStore.isAuthenticated){
