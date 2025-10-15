@@ -1,0 +1,597 @@
+.splat-upload-container {
+  padding: 16px;
+  background: transparent;
+}
+
+/* 点云类型配置 */
+.pointcloud-type-config {
+  margin-bottom: 20px;
+  background: rgba(255, 255, 255, 0.08);
+  -webkit-backdrop-filter: blur(15px);
+  backdrop-filter: blur(15px);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 
+    0 4px 16px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.pointcloud-type-config :deep(.el-card__header) {
+  background: rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.config-title {
+  color: #67C23A;
+  font-weight: 600;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.config-content {
+  padding: 16px 0;
+}
+
+.pointcloud-type-group {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 15px;
+  margin-bottom: 15px;
+}
+
+.pointcloud-type-group :deep(.el-radio) {
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 500;
+  margin: 0;
+}
+
+.pointcloud-type-group :deep(.el-radio.is-checked .el-radio__label) {
+  color: #67C23A;
+}
+
+.pointcloud-type-group :deep(.el-radio__input.is-checked .el-radio__inner) {
+  background-color: #67C23A;
+  border-color: #67C23A;
+}
+
+.type-description {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  padding: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.type-description p {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* 上传区域 */
+.upload-area,
+.file-list-card,
+.upload-config,
+.folder-config {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  -webkit-backdrop-filter: blur(15px);
+  backdrop-filter: blur(15px);
+  box-shadow: 
+    0 4px 16px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  margin-bottom: 16px;
+}
+
+.upload-area :deep(.el-card__header),
+.file-list-card :deep(.el-card__header),
+.upload-config :deep(.el-card__header),
+.folder-config :deep(.el-card__header) {
+  background: rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 600;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.upload-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 600;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+/* 上传拖拽区域 */
+.upload-area :deep(.el-upload-dragger) {
+  background: rgba(255, 255, 255, 0.05);
+  border: 2px dashed rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+}
+
+.upload-area :deep(.el-upload-dragger:hover) {
+  border-color: rgba(103, 194, 58, 0.6);
+  background: rgba(103, 194, 58, 0.08);
+  box-shadow: 0 4px 16px rgba(103, 194, 58, 0.2);
+}
+
+.upload-area :deep(.el-upload__text) {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 14px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.upload-area :deep(.el-upload__tip) {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 12px;
+  margin-top: 8px;
+}
+
+.upload-area :deep(.el-icon--upload) {
+  color: #67C23A;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+}
+
+/* 文件列表 */
+.file-list {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.file-list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 600;
+}
+
+.file-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  margin-bottom: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: rgba(255, 255, 255, 0.05);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+}
+
+.file-item:hover {
+  border-color: rgba(103, 194, 58, 0.5);
+  background: rgba(103, 194, 58, 0.1);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(103, 194, 58, 0.2);
+}
+
+.file-item.selected {
+  border-color: #67C23A;
+  background: rgba(103, 194, 58, 0.15);
+  box-shadow: 
+    0 4px 16px rgba(103, 194, 58, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.file-content {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  min-width: 0;
+}
+
+.file-icon {
+  margin-right: 12px;
+  font-size: 28px;
+  color: #67C23A;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+}
+
+.file-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.file-name {
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.9);
+  margin-bottom: 6px;
+  word-break: break-all;
+  line-height: 1.4;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.file-details {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 4px;
+}
+
+.file-type {
+  font-size: 11px;
+  color: #67C23A;
+  background: rgba(103, 194, 58, 0.2);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-weight: 500;
+}
+
+.file-size {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.file-format {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.6);
+  font-style: italic;
+}
+
+.file-stats {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.stat-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.file-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.file-actions .el-button {
+  padding: 4px 8px;
+  min-height: 28px;
+}
+
+/* 上传配置 */
+.config-item {
+  margin-bottom: 20px;
+}
+
+.config-label {
+  display: block;
+  margin-bottom: 8px;
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 500;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.process-mode-group {
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+.process-mode-group :deep(.el-radio) {
+  color: rgba(255, 255, 255, 0.9);
+  margin: 0;
+}
+
+.process-mode-group :deep(.el-radio.is-checked .el-radio__label) {
+  color: #67C23A;
+}
+
+.process-mode-group :deep(.el-radio__input.is-checked .el-radio__inner) {
+  background-color: #67C23A;
+  border-color: #67C23A;
+}
+
+.optimize-options {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.optimize-options :deep(.el-checkbox__label) {
+  color: rgba(255, 255, 255, 0.9);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.optimize-options :deep(.el-checkbox__input.is-checked .el-checkbox__inner) {
+  background-color: #67C23A;
+  border-color: #67C23A;
+}
+
+.quality-slider :deep(.el-slider__runway) {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+}
+
+.quality-slider :deep(.el-slider__bar) {
+  background: linear-gradient(90deg, #67C23A, #85ce61);
+  border-radius: 4px;
+}
+
+.quality-slider :deep(.el-slider__button) {
+  border-color: #67C23A;
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 2px 8px rgba(103, 194, 58, 0.3);
+}
+
+.quality-description {
+  margin-top: 8px;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.6);
+  font-style: italic;
+}
+
+/* 选择器样式 */
+.upload-config :deep(.el-select .el-input__wrapper) {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+}
+
+.upload-config :deep(.el-select .el-input__wrapper:hover) {
+  border-color: rgba(103, 194, 58, 0.5);
+}
+
+.upload-config :deep(.el-select .el-input__wrapper.is-focus) {
+  border-color: #67C23A;
+  box-shadow: 0 0 0 2px rgba(103, 194, 58, 0.2);
+}
+
+.upload-config :deep(.el-select .el-input__inner) {
+  color: rgba(255, 255, 255, 0.9);
+  background: transparent;
+}
+
+/* 输入框样式 */
+.folder-config :deep(.el-input__wrapper) {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.folder-config :deep(.el-input__wrapper:hover) {
+  border-color: rgba(103, 194, 58, 0.5);
+}
+
+.folder-config :deep(.el-input__wrapper.is-focus) {
+  border-color: #67C23A;
+  box-shadow: 
+    inset 0 1px 3px rgba(0, 0, 0, 0.1),
+    0 0 0 2px rgba(103, 194, 58, 0.2);
+}
+
+.folder-config :deep(.el-input__inner) {
+  color: rgba(255, 255, 255, 0.9);
+  background: transparent;
+}
+
+.folder-config :deep(.el-input__inner::placeholder) {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.folder-hint {
+  margin-top: 8px;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.6);
+  font-style: italic;
+}
+
+/* 上传按钮 */
+.upload-actions {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.upload-button {
+  background: linear-gradient(135deg, #67C23A, #85ce61);
+  border: none;
+  border-radius: 8px;
+  box-shadow: 
+    0 4px 16px rgba(103, 194, 58, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  transition: all 0.3s ease;
+  min-width: 180px;
+}
+
+.upload-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 
+    0 6px 20px rgba(103, 194, 58, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.upload-button:disabled {
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.5);
+  box-shadow: none;
+  transform: none;
+}
+
+/* 进度卡片 */
+.progress-card {
+  margin-top: 20px;
+  background: rgba(255, 255, 255, 0.08);
+  -webkit-backdrop-filter: blur(15px);
+  backdrop-filter: blur(15px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  box-shadow: 
+    0 4px 16px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.progress-card :deep(.el-card__header) {
+  background: rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.progress-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.progress-details p {
+  margin: 5px 0;
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.progress-details strong {
+  color: rgba(255, 255, 255, 0.95);
+}
+
+/* 预览对话框 */
+.preview-loading {
+  text-align: center;
+  padding: 40px;
+}
+
+.loading-text {
+  margin-top: 20px;
+  color: rgba(255, 255, 255, 0.8);
+  font-weight: 500;
+}
+
+.preview-content {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.preview-info :deep(.el-descriptions) {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+}
+
+.preview-info :deep(.el-descriptions__label) {
+  color: rgba(255, 255, 255, 0.8);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.preview-info :deep(.el-descriptions__content) {
+  color: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.preview-visualization {
+  height: 300px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.preview-placeholder {
+  text-align: center;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.preview-placeholder .el-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+  color: #67C23A;
+}
+
+.preview-placeholder p {
+  margin: 8px 0;
+  font-size: 16px;
+}
+
+.preview-note {
+  font-size: 12px !important;
+  font-style: italic;
+  color: rgba(255, 255, 255, 0.5) !important;
+}
+
+/* 滚动条样式 */
+.file-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.file-list::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+}
+
+.file-list::-webkit-scrollbar-thumb {
+  background: rgba(103, 194, 58, 0.5);
+  border-radius: 3px;
+}
+
+.file-list::-webkit-scrollbar-thumb:hover {
+  background: rgba(103, 194, 58, 0.7);
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+  .splat-upload-container {
+    padding: 12px;
+  }
+  
+  .pointcloud-type-group {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+  
+  .process-mode-group {
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .file-details {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+  
+  .upload-button {
+    width: 100%;
+    min-width: auto;
+  }
+  
+  .file-actions {
+    flex-direction: column;
+    gap: 4px;
+  }
+  
+  .preview-content {
+    gap: 15px;
+  }
+  
+  .preview-visualization {
+    height: 200px;
+  }
+}
+
+/* 深色主题适配 */
+@media (prefers-color-scheme: dark) {
+  .splat-upload-container {
+    color: rgba(255, 255, 255, 0.9);
+  }
+}

@@ -23,19 +23,11 @@
               </el-menu-item>
               <el-menu-item index="1-3">
                 <el-icon><Document /></el-icon>
-                文档上传
+                图片文件夹上传|压缩文件上传
               </el-menu-item>
               <el-menu-item index="1-4">
                 <el-icon><Box /></el-icon>
-                压缩文件上传
-              </el-menu-item>
-              <el-menu-item index="1-5">
-                <el-icon><Connection /></el-icon>
-                点云文件上传
-              </el-menu-item>
-              <el-menu-item index="1-6">
-                <el-icon><Files /></el-icon>
-                其他文件上传
+                点云文件夹上传
               </el-menu-item>
             </el-menu-item-group>
           </el-sub-menu>
@@ -43,11 +35,11 @@
             <template #title>
               <span class="menu-title-content">
                 <el-icon class="menu-icon"><Folder /></el-icon>
-                <span class="menu-text">文件管理</span>
+                <span class="menu-text">训练管理</span>
               </span>
             </template>
             <el-menu-item-group>
-              <template #title>文件操作</template>
+              
               <el-menu-item index="2-1">
                 <el-icon><List /></el-icon>
                 文件列表
@@ -65,12 +57,12 @@
             </el-menu-item-group>
           </el-sub-menu>
           <el-sub-menu index="3">
-            <template #title>
+
               <span class="menu-title-content">
                 <el-icon class="menu-icon"><Setting /></el-icon>
                 <span class="menu-text">系统设置</span>
               </span>
-            </template>
+
             <el-menu-item-group>
               <template #title>用户设置</template>
               <el-menu-item index="3-1">
@@ -112,7 +104,8 @@ import {
 import ImageUpload from './FileUpload/ImageUpload.vue'
 import VideoUpload from './FileUpload/VideoUpload.vue'
 import FileList from './FileUpload/FileList.vue'
-
+import FolderUpload from './FileUpload/FolderUpload.vue'
+import SplatUpload from './FileUpload/SplatUpload.vue'
 const activeIndex = ref('1-1')
 
 // 获取当前页面标题
@@ -120,10 +113,9 @@ const getCurrentTitle = () => {
   const titleMap: Record<string, string> = {
     '1-1': '图片上传',
     '1-2': '视频上传', 
-    '1-3': '文档上传',
-    '1-4': '压缩文件上传',
-    '1-5': '点云文件上传',
-    '1-6': '其他文件上传',
+    '1-3': '压缩包&文件夹上传',
+    '1-4': '点云文件上传',
+    '1-6': 'Colmap文件上传',
     '2-1': '文件列表',
     '2-2': '文件搜索',
     '2-3': '批量处理',
@@ -150,10 +142,9 @@ const mainComponent = computed(() => {
       case '1-2':
         return markRaw(VideoUpload)
       case '1-3':
+        return markRaw(FolderUpload)
       case '1-4':
-      case '1-5':
-      case '1-6':
-        return null // 其他文件类型上传组件待开发
+        return markRaw(SplatUpload)
       default:
         return null
     }
