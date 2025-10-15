@@ -1,80 +1,93 @@
-.register {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 100vh;
-  width: 100%;
-}
-
-.card {
-  width: 100%;
-  max-width: 420px; /* Control form width */
-  background-color: rgba(255, 255, 255, 0.15); /* Semi-transparent background */
-  -webkit-backdrop-filter: blur(10px); /* Frosted glass effect */
-  backdrop-filter: blur(10px); /* Frosted glass effect */
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 15px; /* Softer corners */
-  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
-}
-
-.card-body {
-  padding: 3rem !important;
-}
-
-/* New styles for custom input group */
-.custom-input-group {
+.register-container {
+  padding: 40px;
   position: relative;
+  overflow: hidden;
+}
+.card-header {
+  font-size: 40px;
+  color: #fff;
+  text-align: center;
+}
+.register-card {
+  width: 100%;
+  padding: 20px;
+  position: relative;
+  z-index: 1;
+  background: rgba(255, 255, 255, 0.15) !important;  /* 降低不透明度 */
+  -webkit-backdrop-filter: blur(10px) !important;
+  backdrop-filter: blur(10px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.18) !important;
+  border-radius: 24px !important;
 }
 
-.input-icon {
-  position: absolute;
-  left: 15px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: rgba(255, 255, 255, 0.7);
-  z-index: 10;
+.title {
+  font-size: 90px;  /* 增大标题字号 */
+  margin-bottom: 40px;
+  color: #fff;  /* 改为白色 */
+  font-weight: 600;
+  text-align: center;
 }
 
-.form-control {
-  background-color: rgba(255, 255, 255, 0.2);
+:deep(.el-form-item__label) {
+  font-size: 58px;
+  color: #fff; 
+  margin-bottom: 40px;
+}
+
+:deep(.el-input__wrapper) {
+  background: rgba(255, 255, 255, 0.1);  /* 更透明的输入框 */
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  height: 96px;  /* 增加输入框高度 */
+}
+
+:deep(.el-input__inner) {
+  color: #fff;  
+  font-size: 40px;
+}
+
+:deep(.el-input__inner::placeholder) {
+  color: rgba(255, 255, 255, 0.7);  /* 占位符文字颜色 */
+}
+
+.register-button {
+  width: 100%;
+  height: 80px;  /* 增加按钮高度 */
+  font-size: 50px;
+  margin-top: 30px;
+  background: rgba(64, 158, 255, 0.8);  /* 半透明的按钮 */
   border: none;
-  border-radius: 8px; /* Add some radius */
-  color: white;
-  padding-left: 45px; /* Make space for the icon */
-  height: 48px; /* Taller inputs */
 }
 
-.form-control:focus {
-  background-color: rgba(255, 255, 255, 0.3);
-  box-shadow: none;
-  color: white;
-  border: 1px solid rgba(255, 255, 255, 0.4);
+.login-link {
+  margin-top: 30px;
+  font-size: 36px;
+  text-align: center;
+  color: #fff;
 }
 
-.form-control::placeholder {
-  color: rgba(255, 255, 255, 0.7);
-}
-
-h2 {
-  color: #fff !important;
+.login-link a {
+  color: #409EFF;
   font-weight: 600;
 }
 
-.form-label, p, a, .text-danger {
-  color: #fff !important;
+/* 输入框获得焦点时的效果 */
+:deep(.el-input__wrapper:hover),
+:deep(.el-input__wrapper:focus-within) {
+  background: rgba(255, 255, 255, 0.2);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.3);
 }
 
-.btn-primary {
-  border-radius: 8px;
-  height: 48px;
+/* 调整输入框前缀图标大小 */
+:deep(.el-input__prefix .el-icon) {
+  font-size: 50px; /* 控制大小 */
+  color: #fff; /* 改颜色 */
 }
 
-a:hover {
-  text-decoration: underline;
-}
-
+/* 错误提示样式 */
 .alert {
-    background-color: rgba(0, 0, 0, 0.3);
-    border: none;
-    color: white;
+  background-color: rgba(220, 53, 69, 0.2);
+  border: 1px solid rgba(220, 53, 69, 0.3);
+  color: #fff;
+  border-radius: 8px;
+  margin-bottom: 20px;
 }

@@ -15,4 +15,4 @@ class UserResponse(BaseModel):
     email: EmailStr
 
     class Config:
-        from_attributes = True  # 将 orm_mode = True 改为 from_attributes = True
+        from_attributes = True  

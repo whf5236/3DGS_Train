@@ -101,6 +101,7 @@
 <script setup lang="ts">
 import { useRegister } from '@/composables/useRegister';
 import { Message, User, Lock } from '@element-plus/icons-vue';
+import { ElCard,ElCol,ElRow,ElForm,ElFormItem,ElInput,ElButton,ElAlert, } from 'element-plus';
 
 const { 
   username, 

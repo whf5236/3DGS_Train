@@ -16,8 +16,8 @@ export function useRegister() {
 
     // 计算属性
     const passwordMismatech = computed(() =>{
-        return password.value && confirmPassword.value 
-        && password.value !== confirmPassword.value
+        return !!(password.value && confirmPassword.value 
+        && password.value !== confirmPassword.value)
     })
     // 注册方法
     const register = async () => { 

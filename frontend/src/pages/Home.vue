@@ -102,6 +102,6 @@ const features = [
 ]
 </script>
 
-<style scoped src="@/assets/styles/home.scss">
+<style scoped src="../asset/Home.css">
 
 </style>
