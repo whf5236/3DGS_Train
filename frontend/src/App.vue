@@ -1,14 +1,5 @@
 <script setup lang="ts" name="App">
-import { computed} from 'vue'
-import { useRoute } from 'vue-router'
-import AuthLayout from '@/layouts/AuthLayout.vue'
 import AppLayout from '@/layouts/AppLayout.vue'
-// 根据路由元信息切换布局
-const route = useRoute()
-const layout = computed(() => {
-  const layoutType = route.meta.layout as string || 'AppLayout'
-  return layoutType === 'AppLayout'? AppLayout: AuthLayout  
-})
 
 </script>
 <template>
@@ -89,7 +80,7 @@ const layout = computed(() => {
                     detectRetina: true
                 }"
         />
-        <component :is="layout" />
+        <AppLayout />
     </div>
   
 </template>

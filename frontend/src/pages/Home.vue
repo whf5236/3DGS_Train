@@ -17,8 +17,6 @@
           <div class="action-buttons">
             <el-button 
               v-if="!isAuthenticated" 
-              type="primary" 
-              size="large"
               @click="router.push('/login')"
               :icon="User"
             >
@@ -40,7 +38,7 @@
 
     <!-- Features Section -->
     <el-row :gutter="24" class="features-section" justify="center">
-      <el-col :xs="24" :sm="12" :md="6" v-for="feature in features" :key="feature.title">
+      <el-col :xs="24" :sm="12" :md="8" :lg="6" v-for="feature in features" :key="feature.title">
         <el-card class="feature-card" shadow="hover">
           <template #header>
             <div class="feature-header">
@@ -58,7 +56,6 @@
 </template>
 
 <script setup lang="ts" name="Home">
-import { useAuthStatus } from '@/composables/useAuthStatus'
 import { useRouter } from 'vue-router'
 import { 
   VideoCamera, 
@@ -69,8 +66,12 @@ import {
   Setting, 
   TrendCharts 
 } from '@element-plus/icons-vue'
+import { ElCard, ElIcon, ElButton, ElRow, ElCol } from 'element-plus'
+import { useUserStore } from '@/stores/userStore'
 
-const { isAuthenticated } = useAuthStatus()
+import { storeToRefs } from 'pinia'
+const userStore = useUserStore();
+const {isAuthenticated} = storeToRefs(userStore) 
 const router = useRouter()
 
 // 功能特性数据

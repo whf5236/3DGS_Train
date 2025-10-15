@@ -247,8 +247,8 @@
 .file-grid :deep(.card-actions .el-button) {
   background: rgba(255, 255, 255, 0.1) !important;
   border: 1px solid rgba(255, 255, 255, 0.2) !important;
-  backdrop-filter: blur(8px) !important;
   -webkit-backdrop-filter: blur(8px) !important;
+  backdrop-filter: blur(8px) !important;
   color: rgba(255, 255, 255, 0.9) !important;
   border-radius: 6px !important;
   transition: all 0.3s ease !important;
@@ -291,8 +291,8 @@
   background: rgba(64, 158, 255, 0.1);
   padding: 6px 12px;
   border-radius: 8px;
-  backdrop-filter: blur(5px);
   -webkit-backdrop-filter: blur(5px);
+  backdrop-filter: blur(5px);
   font-size: 14px;
   border: 1px solid rgba(64, 158, 255, 0.2);
 }
@@ -305,8 +305,8 @@
 .table-actions :deep(.el-button) {
   background: rgba(255, 255, 255, 0.1) !important;
   border: 1px solid rgba(255, 255, 255, 0.2) !important;
-  backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
   border-radius: 6px;
   transition: all 0.3s ease;
   font-size: 13px !important;
@@ -485,8 +485,8 @@
   background: rgba(64, 158, 255, 0.15);
   padding: 6px 12px;
   border-radius: 10px;
-  backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
   font-size: 14px;
   border: 1px solid rgba(64, 158, 255, 0.3);
   font-weight: 500;
@@ -502,27 +502,27 @@
 .table-actions :deep(.el-button) {
   background: rgba(255, 255, 255, 0.1) !important;
   border: 1px solid rgba(255, 255, 255, 0.2) !important;
-  backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
   border-radius: 8px;
   transition: all 0.3s ease;
-  font-size: 14px !important;
-  padding: 8px !important;
+  font-size: 14px ;
+  padding: 8px ;
   min-width: 36px;
   height: 36px;
 }
 
 .table-actions :deep(.el-button:hover) {
-  background: rgba(255, 255, 255, 0.2) !important;
-  border-color: rgba(255, 255, 255, 0.4) !important;
+  background: rgba(255, 255, 255, 0.2) ;
+  border-color: rgba(255, 255, 255, 0.4) ;
   transform: translateY(-2px) scale(1.05);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .table-actions :deep(.el-button--primary) {
-  background: rgba(64, 158, 255, 0.2) !important;
-  border-color: rgba(64, 158, 255, 0.4) !important;
-  color: rgba(255, 255, 255, 0.95) !important;
+  background: rgba(64, 158, 255, 0.2) ;
+  border-color: rgba(64, 158, 255, 0.4) ;
+  color: rgba(255, 255, 255, 0.95) ;
 }
 
 .table-actions :deep(.el-button--primary:hover) {
@@ -563,8 +563,9 @@
 :deep(.el-table__body-wrapper)::-webkit-scrollbar-thumb {
   background: rgba(255, 255, 255, 0.2);
   border-radius: 4px;
-  backdrop-filter: blur(5px);
   -webkit-backdrop-filter: blur(5px);
+  backdrop-filter: blur(5px);
+  
 }
 
 :deep(.el-table__body-wrapper)::-webkit-scrollbar-thumb:hover {
