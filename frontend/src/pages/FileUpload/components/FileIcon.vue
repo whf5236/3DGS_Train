@@ -9,7 +9,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useFileUtils } from '@/composables/useUpload/useFileUtils'
-
+import { ElIcon } from 'element-plus';
 const { getFileTypeInfo } = useFileUtils()
 
 interface Props {
