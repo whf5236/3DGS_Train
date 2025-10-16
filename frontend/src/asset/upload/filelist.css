@@ -48,11 +48,26 @@
   border: 1px solid rgba(64, 158, 255, 0.4);
   -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
-  color: rgba(255, 255, 255, 0.95);
-  border-radius: 14px ;
-  transition: all 0.3s ease;
-  font-size: 30px ;
-  height: auto ;
+}
+
+/* 阶段选择器样式 */
+.toolbar .header-actions :deep(.el-select) {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+}
+
+.toolbar .header-actions :deep(.el-select .el-input__wrapper) {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.toolbar .header-actions :deep(.el-select .el-input__inner) {
+  color: rgba(255, 255, 255, 0.9);
 }
 .toolbar .header-actions :deep(.el-button:hover) {
   background: rgba(64, 158, 255, 0.35) !important;

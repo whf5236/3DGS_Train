@@ -42,7 +42,7 @@ router.beforeEach((to, from, next) =>{
         // 如果目标路由to需要认证且用户未登录，则跳转到登录页面
         next('/login')
     }else if((to.path === '/login' || to.path === '/register') && userStore.isAuthenticated){
-        next('/dahboard')
+        next('/dashboard')
         // 如果已经登录的用户尝试访问登录或者注册页面，则跳转到仪表盘页面
     }else{
         // 默认放行

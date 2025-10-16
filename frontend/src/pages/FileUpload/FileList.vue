@@ -11,6 +11,29 @@
             已上传的数据
           </div>
           <div class="header-actions">
+            <!-- 阶段切换选择器 -->
+            <el-select 
+              v-model="fileStore.currentStage" 
+              placeholder="选择处理阶段"
+              @change="fileStore.switchStage"
+              style="width: 140px; margin-right: 10px;"
+            >
+              <el-option label="图片阶段" value="image">
+                <span class="stage-option">
+                  <el-icon><Picture /></el-icon> 图片阶段
+                </span>
+              </el-option>
+              <el-option label="COLMAP阶段" value="colmap">
+                <span class="stage-option">
+                  <el-icon><DataAnalysis /></el-icon> COLMAP阶段
+                </span>
+              </el-option>
+              <el-option label="点云阶段" value="pcd">
+                <span class="stage-option">
+                  <el-icon><Connection /></el-icon> 点云阶段
+                </span>
+              </el-option>
+            </el-select>
             <el-button 
               @click="fileStore.refreshData" 
               :icon="Refresh" 
@@ -23,30 +46,6 @@
         </div>
         <div class="toolbar-bottom">        
           <div class="toolbar-left">
-            <el-select 
-              v-model="fileStore.currentFilter" 
-              placeholder="选择类型"   
-              @change="fileStore.setFilter"
-            >
-                <el-option label="全部" value="all">
-                  <span class="filter-option">全部 ({{ fileStore.categoryStats.all }})</span>
-                </el-option>
-                <el-option label="文件夹" value="folders">
-                  <span class="filter-option">文件夹 ({{ fileStore.categoryStats.folders }})</span>
-                </el-option>
-                <el-option label="文件" value="files">
-                  <span class="filter-option">文件 ({{ fileStore.categoryStats.files }})</span>
-                </el-option>
-                <el-divider />
-                <el-option 
-                  v-for="(category, key) in FILE_CATEGORIES" 
-                  :key="key"
-                  :label="category.name" 
-                  :value="key"
-                >
-                  <span>{{ category.name }} ({{ fileStore.categoryStats[key] || 0 }})</span>
-                </el-option>
-            </el-select>
             <el-select 
               v-model="sortBy" 
               placeholder="排序方式" 
@@ -242,6 +241,8 @@ import {
   SortDown,
   Histogram,
   Delete,
+  DataAnalysis,
+  Connection,
 } from '@element-plus/icons-vue'
 import { ElTableColumn,ElTable,ElButton,ElTag,
   ElEmpty,ElIcon,ElResult,ElSkeleton,ElButtonGroup,
@@ -249,7 +250,7 @@ import { ElTableColumn,ElTable,ElButton,ElTag,
 import FileCard from './components/FileCard.vue'
 import FileIcon from './components/FileIcon.vue'
 import { useFileListComponent, type FileListProps } from '@/composables/useUpload/useFileList'
-import { FILE_CATEGORIES, type FolderItem } from '@/stores/fileStore'
+import { type FolderItem } from '@/stores/fileStore'
 
 // Props
 const props = withDefaults(defineProps<FileListProps & { showPreview?: boolean }>(), {

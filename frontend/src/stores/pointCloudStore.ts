@@ -5,12 +5,14 @@ import { eventBus } from '@/utils/eventBus'
 import type { WebSocketMessage } from '@/services/websocket'
 import { usePointCloudWebSocket } from '@/composables/useWebSocket'
 
-// 类型定义
+// 类型定义 - 与 fileStore 的 FolderItem 兼容
 export interface FolderInfo {
   name: string
-  has_images: boolean
-  image_count?: number
-  created_time?: number
+  type: string
+  image_count: number
+  created_time: number
+  item_type?: 'folder'
+  category?: 'images' | 'point_cloud' | 'colmap' | 'general'
 }
 
 export interface ProcessingTask {
@@ -102,16 +104,13 @@ export const usePointCloudStore = defineStore('pointCloud', {
   },
 
   actions: {
-    // 获取文件夹列表
+    // 获取文件夹列表 - 获取 image 阶段的文件夹用于点云处理
     async fetchFolders(refresh: boolean = false) {
       this.loading = true
       this.error = null
-
       try {
-        // 动态导入 userStore 避免循环依赖
         const { useUserStore } = await import('./userStore')
         const userStore = useUserStore()
-        
         if (!userStore.isAuthenticated) {
           throw new Error('用户未登录')
         }
@@ -120,11 +119,22 @@ export const usePointCloudStore = defineStore('pointCloud', {
         if (!username) {
           throw new Error('用户名不存在')
         }
+        // 直接获取 image 阶段的文件夹，这些是可以用于点云处理的输入
+        const response = await api.get(`/upload/get_files?username=${username}&stage=image`)
+
+        const imageFolders = response.data.folders || []
+    
+ 
+        // 转换为 FolderInfo 格式
+        this.folders = imageFolders.map((folder: any) => ({
+          name: folder.name,
+          type: folder.type || 'folder',
+          image_count: folder.image_count || 0,
+          created_time: folder.created_time || Date.now(),
+          item_type: 'folder' as const,
+          category: 'images' as const
+        }))
         
-        const response = await api.get(`/api/folders/${username}`)
-        
-        // 过滤出包含图片的文件夹
-        this.folders = response.data.folders.filter((folder: FolderInfo) => folder.has_images) || []
       } catch (error: any) {
         this.error = error.message || 'Failed to load folders. Please try again.'
         console.error('Error fetching folders:', error)
@@ -133,27 +143,32 @@ export const usePointCloudStore = defineStore('pointCloud', {
       }
     },
 
-    // 获取处理历史
+    // 获取处理历史 - 获取 colmap 阶段的文件夹
     async fetchResults() {
       this.loadingResults = true
 
       try {
         const { useUserStore } = await import('./userStore')
         const userStore = useUserStore()
-        
+        const username = userStore.user?.username
         if (!userStore.isAuthenticated) {
           throw new Error('用户未登录')
         }
-        
-        const username = userStore.user?.username
         if (!username) {
           throw new Error('用户名不存在')
-        }
-        
-        const response = await api.get(`/point-cloud/results?username=${username}`)
-        this.results = response.data.results || []
+        }   
+        const response = await api.get(`/upload/get_files?username=${username}&stage=colmap`)
+        console.log('colmapFolders', response.data.folders)
+        const colmapFolders = response.data.folders || []
+        this.results = colmapFolders.map((folder: any) => ({
+          name: folder.name,
+          status: 'completed' as const,
+          timestamp: folder.created_time || Date.now(),
+          processing_time: 0
+            }))
       } catch (error: any) {
         console.error('Error fetching results:', error)
+        this.results = []
       } finally {
         this.loadingResults = false
       }
@@ -191,10 +206,11 @@ export const usePointCloudStore = defineStore('pointCloud', {
         
         this.processingFolder = folderName
         
-        const response = await api.post(
-          `/point-cloud/process?username=${username}`,
-          { folder_name: folderName }
-        )
+        const formData = new FormData()
+        formData.append('username', username)
+        formData.append('folder_name', folderName)
+        
+        const response = await api.post('/upload/point-cloud/process', formData)
 
         // 设置当前任务
         this.currentTask = {
@@ -357,6 +373,24 @@ export const usePointCloudStore = defineStore('pointCloud', {
 
     updateProcessingOptions(options: Partial<ProcessingOptions>) {
       this.processingOptions = { ...this.processingOptions, ...options }
+    },
+
+    // 便捷方法：直接从 fileStore 获取图片文件夹
+    async getImageFoldersFromFileStore() {
+      try {
+        const { useFileStore } = await import('./fileStore')
+        const fileStore = useFileStore()
+        
+        // 确保 fileStore 有最新数据
+        if (fileStore.folders.length === 0) {
+          await fileStore.fetchFiles()
+        }
+        
+        return fileStore.folders.filter((folder: any) => folder.has_images)
+      } catch (error) {
+        console.error('Error getting image folders from fileStore:', error)
+        return []
+      }
     }
   }
 })

@@ -415,8 +415,11 @@ const framePreviewList = computed(() =>
 )
 
 // 监听选中文件变化
-watch(() => props.selectedFile, async (newFile) => {
-  if (newFile && isVideo.value) {
+watch(
+  () => props.selectedFile, 
+  async (newFile) => {
+    if(!newFile) return
+    if (isVideo.value) {
     activeTab.value = 'video'
     await loadVideoInfo()
     await loadFrames()

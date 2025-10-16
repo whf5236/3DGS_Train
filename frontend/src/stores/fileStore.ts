@@ -15,63 +15,44 @@ export interface FileItem {
   created_time: number
   item_type: 'file'
   extension?: string
-  category?: 'image' | 'video' | 'document' | 'archive' | 'pointcloud' | 'other'
+  category?: 'image' | 'video'  | 'archive' | 'pointcloud' | 'other'
 }
 
 export interface FolderItem {
   name: string
   type: string
-  has_images: boolean
   image_count: number
   created_time: number
   item_type: 'folder'
-  category?: 'images' | 'point_cloud' | 'colmap' | 'general'
+  category?: 'images' | 'colmap' | 'pcd'
 }
 
 export type FileSystemItem = FileItem | FolderItem
 
-// 文件分类配置
-export const FILE_CATEGORIES = {
+// 处理阶段分类配置
+export const STAGE_CATEGORIES = {
   image: {
-    name: '图片文件',
-    extensions: ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg'] as string[],
+    name: '图片阶段',
+    description: '原始图片数据',
     color: '#67C23A',
     icon: 'Picture'
   },
-  video: {
-    name: '视频文件', 
-    extensions: ['mp4', 'avi', 'mov', 'wmv', 'flv', 'mkv', 'webm'] as string[],
+  colmap: {
+    name: 'COLMAP阶段',
+    description: '特征提取与匹配',
     color: '#E6A23C',
-    icon: 'VideoPlay'
+    icon: 'DataAnalysis'
   },
-  document: {
-    name: '文档文件',
-    extensions: ['pdf', 'doc', 'docx', 'txt', 'md', 'rtf'] as string[],
+  pcd: {
+    name: '点云阶段',
+    description: '训练后的点云数据',
     color: '#409EFF',
-    icon: 'Document'
-  },
-  archive: {
-    name: '压缩文件',
-    extensions: ['zip', 'rar', '7z', 'tar', 'gz'] as string[],
-    color: '#F56C6C',
-    icon: 'Box'
-  },
-  pointcloud: {
-    name: '点云文件',
-    extensions: ['ply', 'pcd', 'xyz', 'pts', 'las', 'laz', 'obj', 'splat'] as string[],
-    color: '#909399',
     icon: 'Connection'
-  },
-  other: {
-    name: '其他文件',
-    extensions: [] as string[],
-    color: '#909399',
-    icon: 'Files'
   }
 }
 
-// 定义文件类别类型
-export type FileCategoryKey = keyof typeof FILE_CATEGORIES
+// 定义阶段类型
+export type StageKey = keyof typeof STAGE_CATEGORIES
 
 export const useFileStore = defineStore('file', {
   state: () => ({
@@ -79,6 +60,9 @@ export const useFileStore = defineStore('file', {
     files: [] as FileItem[],
     folders: [] as FolderItem[],
     processedFolders: [] as string[],
+    
+    // 当前获取的阶段
+    currentStage: 'image' as 'image' | 'colmap' | 'pcd',
     
     // UI状态
     loading: false,
@@ -102,32 +86,23 @@ export const useFileStore = defineStore('file', {
   }),
 
   getters: {
-    // 合并文件和文件夹
     allItems: (state): FileSystemItem[] => {
       const foldersWithType = state.folders.map(folder => ({
         ...folder,
         item_type: 'folder' as const,
-        category: folder.type === 'point_cloud' ? 'point_cloud' as const : 
-                 folder.has_images ? 'images' as const : 'general' as const
+        // 直接根据当前获取的阶段来确定文件夹类别
+        category: state.currentStage === 'image' ? 'images' as const :
+                 state.currentStage === 'colmap' ? 'colmap' as const :
+                 state.currentStage === 'pcd' ? 'pcd' as const : 'images' as const
       }))
       
       const filesWithType = state.files.map(file => {
         const extension = file.name.split('.').pop()?.toLowerCase() || ''
-        let category: FileItem['category'] = 'other'
-        
-        // 查找文件类别
-        for (const [categoryKey, config] of Object.entries(FILE_CATEGORIES)) {
-          if (config.extensions.includes(extension)) {
-            category = categoryKey as FileCategoryKey
-            break
-          }
-        }
         
         return {
           ...file,
           item_type: 'file' as const,
-          extension,
-          category
+          extension
         }
       })
       
@@ -191,13 +166,13 @@ export const useFileStore = defineStore('file', {
       })
     },
 
-    // 文件类别统计
-    categoryStats: (state) => {
+    // 阶段统计
+    stageStats: (state) => {
       const stats: Record<string, number> = {
         all: 0,
         folders: 0,
         files: 0,
-        ...Object.keys(FILE_CATEGORIES).reduce((acc, key) => ({ ...acc, [key]: 0 }), {})
+        ...Object.keys(STAGE_CATEGORIES).reduce((acc, key) => ({ ...acc, [key]: 0 }), {})
       }
       
       ;(state as any).allItems.forEach((item: FileSystemItem) => {
@@ -222,10 +197,11 @@ export const useFileStore = defineStore('file', {
 
     // 预览文件列表（仅图片）
     previewFileList: (state) => {
+      const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg']
       return state.files
         .filter(file => {
           const extension = file.name.split('.').pop()?.toLowerCase() || ''
-          return FILE_CATEGORIES.image.extensions.includes(extension)
+          return imageExtensions.includes(extension)
         })
         .map(file => ({
           filename: file.name,
@@ -239,7 +215,7 @@ export const useFileStore = defineStore('file', {
 
   actions: {
     // 获取文件数据
-    async fetchFiles() {
+    async fetchFiles(stage: 'image' | 'colmap' | 'pcd' = 'image') {
       this.loading = true
       this.error = null
       
@@ -252,9 +228,12 @@ export const useFileStore = defineStore('file', {
         
         const username = userStore.user?.username
         
+        // 更新当前阶段
+        this.currentStage = stage
+        
         // 如果有用户名，传递给后端API
-        const params = username ? { username } : {}
-        const response = await api.get('/upload/files', { params })
+        const params = username ? { username, stage } : { stage }
+        const response = await api.get('/upload/get_files', { params })
         
         this.files = response.data.files || []
         this.folders = response.data.folders || []
@@ -271,8 +250,16 @@ export const useFileStore = defineStore('file', {
 
     // 刷新数据
     async refreshData() {
-      await this.fetchFiles()
+      await this.fetchFiles(this.currentStage)
       ElMessage.success('数据已刷新')
+    },
+
+    // 切换处理阶段
+    async switchStage(stage: 'image' | 'colmap' | 'pcd') {
+      if (stage !== this.currentStage) {
+        await this.fetchFiles(stage)
+        ElMessage.success(`已切换到${stage === 'image' ? '图片' : stage === 'colmap' ? 'COLMAP' : '点云'}阶段`)
+      }
     },
 
     // 选择项目

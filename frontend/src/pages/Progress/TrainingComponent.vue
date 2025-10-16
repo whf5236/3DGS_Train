@@ -1,1564 +1,1828 @@
 <template>
   <div class="training-component">
     <!-- 源文件夹选择区域 -->
-    <div class="parameter-section glass-card">
-      <h5>
-        <i class="fas fa-folder-open me-2"></i>
-        源文件夹选择区域
-      </h5>
+    <el-card class="parameter-section">
+      <template #header>
+        <div class="card-header">
+          <h5>
+            <el-icon><FolderOpened /></el-icon>
+            源文件夹选择区域
+          </h5>
+        </div>
+      </template>
+      
       <div class="source-folder-selector">
-        <p class="mb-3">选择一个Colmap处理过的点云文件进行训练:</p>
+        <p style="margin-bottom: 16px;">选择一个Colmap处理过的点云文件进行训练:</p>
 
-        <div v-if="loadingFolders" class="text-center py-3">
-          <div class="spinner-border text-primary" role="status">
-            <span class="visually-hidden">加载中...</span>
-          </div>
-          <p class="mt-2">加载可用文件夹...</p>
+        <div v-if="loadingFolders" v-loading="loadingFolders" class="text-center" style="padding: 40px 0; min-height: 120px;">
+          <p>加载可用文件夹...</p>
         </div>
 
-        <div v-else-if="folders.length === 0" class="text-center py-3">
-          <i class="fas fa-folder-open fa-3x text-muted mb-3"></i>
-          <p class="text-muted">没有可用的文件夹</p>
-          <p class="text-muted small">Process images in the Point Cloud Processing tab first</p>
-        </div>
+        <el-empty v-else-if="folders.length === 0" description="没有可用的文件夹">
+          <template #image>
+            <el-icon size="60"><FolderOpened /></el-icon>
+          </template>
+          <template #description>
+            <p>Process images in the Point Cloud Processing tab first</p>
+          </template>
+        </el-empty>
 
         <div v-else class="folder-list">
-          <div
+          <el-card
             v-for="folder in folders"
             :key="folder.folder_name || folder.name"
             class="folder-item"
             :class="{ 'active': selectedFolder === (folder.folder_name || folder.name) }"
             @click="selectFolder(folder)"
+            shadow="hover"
+            style="margin-bottom: 12px; cursor: pointer;"
           >
-            <div class="folder-icon">
-              <i class="fas fa-folder"></i>
-            </div>
-            <div class="folder-info">
-              <div class="folder-name">{{ folder.folder_name || folder.name }}</div>
-              <div class="folder-details">
-                <span><i class="fas fa-cube me-1"></i> Processed on {{ formatDate(folder.timestamp || folder.created_time) }}</span>
+            <div style="display: flex; align-items: center;">
+              <div class="folder-icon" style="margin-right: 12px;">
+                <el-icon size="24"><Folder /></el-icon>
+              </div>
+              <div class="folder-info">
+                <div class="folder-name" style="font-weight: 500; margin-bottom: 4px;">
+                  {{ folder.folder_name || folder.name }}
+                </div>
+                <div class="folder-details" style="color: #909399; font-size: 12px;">
+                  <el-icon><Box /></el-icon>
+                  Processed on {{ formatDate(folder.timestamp || folder.created_time) }}
+                </div>
               </div>
             </div>
-          </div>
+          </el-card>
         </div>
       </div>
     </div>
 
     <!-- 训练参数配置区域 -->
-    <div class="parameter-section glass-card">
-      <h5>
-        <i class="fas fa-sliders-h me-2"></i>
-        Training Parameters
-      </h5>
+    <el-card class="parameter-section" style="margin-top: 20px;">
+      <template #header>
+        <div class="card-header">
+          <h5>
+            <el-icon><Setting /></el-icon>
+            Training Parameters
+          </h5>
+        </div>
+      </template>
 
       <!-- 基本参数 -->
-      <div class="parameter-group">
-        <h6 class="mb-3">Basic Parameters</h6>
+      <el-card class="parameter-group">
+        <template #header>
+          <h6>Basic Parameters</h6>
+        </template>
 
-        <div class="row parameter-row">
-          <div class="col-md-6">
-            <div class="parameter-label">
-              Iterations
-              <i class="fas fa-question-circle parameter-help" title="Number of total iterations to train for"></i>
-            </div>
-            <input
-              type="number"
-              class="form-control"
-              v-model.number="trainingParams.iterations"
-              min="1000"
-              max="100000"
-            >
-            <div class="parameter-description">默认值: 30,000</div>
-          </div>
+        <el-row :gutter="20" class="parameter-row">
+          <el-col :span="12">
+            <el-form-item>
+              <template #label>
+                <span>
+                  Iterations
+                  <el-tooltip content="Number of total iterations to train for" placement="top">
+                    <el-icon><QuestionFilled /></el-icon>
+                  </el-tooltip>
+                </span>
+              </template>
+              <el-input-number
+                v-model="trainingParams.iterations"
+                :min="1000"
+                :max="100000"
+                style="width: 100%;"
+              />
+              <div class="parameter-description">默认值: 30,000</div>
+            </el-form-item>
+          </el-col>
 
-          <div class="col-md-6">
-            <div class="parameter-label">
-              分辨率缩放
-              <i class="fas fa-question-circle parameter-help" title="Specifies resolution of the loaded images before training"></i>
-            </div>
-            <select class="form-select" v-model="trainingParams.resolution">
-              <option value="-1">自动 (默认值)</option>
-              <option value="1">Original size</option>
-              <option value="2">1/2 resolution</option>
-              <option value="4">1/4 resolution</option>
-              <option value="8">1/8 resolution</option>
-            </select>
-          </div>
-        </div>
+          <el-col :span="12">
+            <el-form-item>
+              <template #label>
+                <span>
+                  分辨率缩放
+                  <el-tooltip content="Specifies resolution of the loaded images before training" placement="top">
+                    <el-icon><QuestionFilled /></el-icon>
+                  </el-tooltip>
+                </span>
+              </template>
+              <el-select v-model="trainingParams.resolution" style="width: 100%;">
+                <el-option label="自动 (默认值)" value="-1" />
+                <el-option label="Original size" value="1" />
+                <el-option label="1/2 resolution" value="2" />
+                <el-option label="1/4 resolution" value="4" />
+                <el-option label="1/8 resolution" value="8" />
+              </el-select>
+            </el-form-item>
+          </el-col>
+        </el-row>
 
-        <div class="row parameter-row">
-          <div class="col-md-6">
-            <div class="form-check">
-              <input class="form-check-input" type="checkbox" v-model="trainingParams.white_background" id="whiteBackground">
-              <label class="form-check-label" for="whiteBackground">
+        <el-row :gutter="20" class="parameter-row">
+          <el-col :span="12">
+            <el-form-item>
+              <el-checkbox v-model="trainingParams.white_background">
                 White Background
-              </label>
-            </div>
-            <div class="parameter-description">Use white background instead of black (default)</div>
-          </div>
+              </el-checkbox>
+              <div class="parameter-description">Use white background instead of black (default)</div>
+            </el-form-item>
+          </el-col>
 
-          <div class="col-md-6">
-            <div class="parameter-label">
-              SH Degree
-              <i class="fas fa-question-circle parameter-help" title="球鞋函数的阶数 (不超过 3)"></i>
-            </div>
-            <select class="form-select" v-model.number="trainingParams.sh_degree">
-              <option value="0">0 - Lambertian</option>
-              <option value="1">1 - Simple directional</option>
-              <option value="2">2 - More detailed</option>
-              <option value="3">3 - Full detail (default)</option>
-            </select>
-          </div>
-        </div>
+          <el-col :span="12">
+            <el-form-item>
+              <template #label>
+                <span>
+                  SH Degree
+                  <el-tooltip content="球鞋函数的阶数 (不超过 3)" placement="top">
+                    <el-icon><QuestionFilled /></el-icon>
+                  </el-tooltip>
+                </span>
+              </template>
+              <el-select v-model="trainingParams.sh_degree" style="width: 100%;">
+                <el-option label="0 - Lambertian" :value="0" />
+                <el-option label="1 - Simple directional" :value="1" />
+                <el-option label="2 - More detailed" :value="2" />
+                <el-option label="3 - Full detail (default)" :value="3" />
+              </el-select>
+            </el-form-item>
+          </el-col>
+        </el-row>
 
-        <div class="row parameter-row">
-          <div class="col-md-6">
-            <div class="parameter-label">
-              数据加载设备
-              <i class="fas fa-question-circle parameter-help" title="Specifies where to put the source image data"></i>
-            </div>
-            <select class="form-select" v-model="trainingParams.data_device">
-              <option value="cuda">CUDA (默认)</option>
-              <option value="cpu">CPU (减少显存的占用)</option>
-            </select>
-          </div>
+        <el-row :gutter="20" class="parameter-row">
+          <el-col :span="12">
+            <el-form-item>
+              <template #label>
+                <span>
+                  数据加载设备
+                  <el-tooltip content="Specifies where to put the source image data" placement="top">
+                    <el-icon><QuestionFilled /></el-icon>
+                  </el-tooltip>
+                </span>
+              </template>
+              <el-select v-model="trainingParams.data_device" style="width: 100%;">
+                <el-option label="CUDA (默认)" value="cuda" />
+                <el-option label="CPU (减少显存的占用)" value="cpu" />
+              </el-select>
+            </el-form-item>
+          </el-col>
 
-          <div class="col-md-6">
-            <div class="form-check">
-              <input class="form-check-input" type="checkbox" v-model="trainingParams.eval" id="evalOption">
-              <label class="form-check-label" for="evalOption">
+          <el-col :span="12">
+            <el-form-item>
+              <el-checkbox v-model="trainingParams.eval">
                 Use Evaluation Split
-              </label>
-            </div>
-            <div class="parameter-description">Use a MipNeRF360-style training/test split for evaluation</div>
-          </div>
-        </div>
-      </div>
+              </el-checkbox>
+              <div class="parameter-description">Use a MipNeRF360-style training/test split for evaluation</div>
+            </el-form-item>
+          </el-col>
+        </el-row>
+      </el-card>
 
       <!-- 学习率参数 -->
-      <div class="parameter-group">
-        <h6 class="mb-3">学习率参数</h6>
+      <div class="parameter-group" style="margin-top: 24px;">
+        <h6 style="margin-bottom: 16px;">学习率参数</h6>
 
-        <div class="row parameter-row">
-          <div class="col-md-6">
-            <div class="parameter-label">
-              位置学习率参数 (初始值)
-              <i class="fas fa-question-circle parameter-help" title="Initial 3D position learning rate"></i>
-            </div>
-            <div class="d-flex align-items-center">
-              <input
-                type="range"
-                class="form-range"
-                v-model.number="trainingParams.position_lr_init"
-                min="0.00001"
-                max="0.001"
-                step="0.00001"
-              >
-              <span class="range-value ms-2">{{ trainingParams.position_lr_init }}</span>
-            </div>
-            <div class="parameter-description">默认值: 0.00016</div>
-          </div>
+        <el-row :gutter="20" class="parameter-row">
+          <el-col :span="12">
+            <el-form-item>
+              <template #label>
+                <span>
+                  位置学习率参数 (初始值)
+                  <el-tooltip content="Initial 3D position learning rate" placement="top">
+                    <el-icon><QuestionFilled /></el-icon>
+                  </el-tooltip>
+                </span>
+              </template>
+              <div style="display: flex; align-items: center;">
+                <el-slider
+                  v-model="trainingParams.position_lr_init"
+                  :min="0.00001"
+                  :max="0.001"
+                  :step="0.00001"
+                  style="flex: 1; margin-right: 12px;"
+                />
+                <span class="range-value">{{ trainingParams.position_lr_init }}</span>
+              </div>
+              <div class="parameter-description">默认值: 0.00016</div>
+            </el-form-item>
+          </el-col>
 
-          <div class="col-md-6">
-            <div class="parameter-label">
-              位置学习率参数 (最终值)
-              <i class="fas fa-question-circle parameter-help" title="Final 3D position learning rate"></i>
-            </div>
-            <div class="d-flex align-items-center">
-              <input
-                type="range"
-                class="form-range"
-                v-model.number="trainingParams.position_lr_final"
-                min="0.0000001"
-                max="0.00001"
-                step="0.0000001"
-              >
-              <span class="range-value ms-2">{{ trainingParams.position_lr_final }}</span>
-            </div>
-            <div class="parameter-description">默认值: 0.0000016</div>
-          </div>
-        </div>
+          <el-col :span="12">
+            <el-form-item>
+              <template #label>
+                <span>
+                  位置学习率参数 (最终值)
+                  <el-tooltip content="Final 3D position learning rate" placement="top">
+                    <el-icon><QuestionFilled /></el-icon>
+                  </el-tooltip>
+                </span>
+              </template>
+              <div style="display: flex; align-items: center;">
+                <el-slider
+                  v-model="trainingParams.position_lr_final"
+                  :min="0.0000001"
+                  :max="0.00001"
+                  :step="0.0000001"
+                  style="flex: 1; margin-right: 12px;"
+                />
+                <span class="range-value">{{ trainingParams.position_lr_final }}</span>
+              </div>
+              <div class="parameter-description">默认值: 0.0000016</div>
+            </el-form-item>
+          </el-col>
+        </el-row>
 
-        <div class="row parameter-row">
-          <div class="col-md-6">
-            <div class="parameter-label">
-              Feature Learning Rate
-              <i class="fas fa-question-circle parameter-help" title="Spherical harmonics features learning rate"></i>
-            </div>
-            <div class="d-flex align-items-center">
-              <input
-                type="range"
-                class="form-range"
-                v-model.number="trainingParams.feature_lr"
-                min="0.0001"
-                max="0.01"
-                step="0.0001"
-              >
-              <span class="range-value ms-2">{{ trainingParams.feature_lr }}</span>
-            </div>
-            <div class="parameter-description">默认值: 0.0025</div>
-          </div>
+        <el-row :gutter="20" class="parameter-row">
+          <el-col :span="12">
+            <el-form-item>
+              <template #label>
+                <span>
+                  Feature Learning Rate
+                  <el-tooltip content="Spherical harmonics features learning rate" placement="top">
+                    <el-icon><QuestionFilled /></el-icon>
+                  </el-tooltip>
+                </span>
+              </template>
+              <div style="display: flex; align-items: center;">
+                <el-slider
+                  v-model="trainingParams.feature_lr"
+                  :min="0.0001"
+                  :max="0.01"
+                  :step="0.0001"
+                  style="flex: 1; margin-right: 12px;"
+                />
+                <span class="range-value">{{ trainingParams.feature_lr }}</span>
+              </div>
+              <div class="parameter-description">默认值: 0.0025</div>
+            </el-form-item>
+          </el-col>
 
-          <div class="col-md-6">
-            <div class="parameter-label">
-              不透明度学习率
-              <i class="fas fa-question-circle parameter-help" title="Opacity learning rate"></i>
-            </div>
-            <div class="d-flex align-items-center">
-              <input
-                type="range"
-                class="form-range"
-                v-model.number="trainingParams.opacity_lr"
-                min="0.001"
-                max="0.1"
-                step="0.001"
-              >
-              <span class="range-value ms-2">{{ trainingParams.opacity_lr }}</span>
-            </div>
-            <div class="parameter-description">默认值: 0.05</div>
-          </div>
-        </div>
+          <el-col :span="12">
+            <el-form-item>
+              <template #label>
+                <span>
+                  不透明度学习率
+                  <el-tooltip content="Opacity learning rate" placement="top">
+                    <el-icon><QuestionFilled /></el-icon>
+                  </el-tooltip>
+                </span>
+              </template>
+              <div style="display: flex; align-items: center;">
+                <el-slider
+                  v-model="trainingParams.opacity_lr"
+                  :min="0.001"
+                  :max="0.1"
+                  :step="0.001"
+                  style="flex: 1; margin-right: 12px;"
+                />
+                <span class="range-value">{{ trainingParams.opacity_lr }}</span>
+              </div>
+              <div class="parameter-description">默认值: 0.05</div>
+            </el-form-item>
+          </el-col>
+        </el-row>
 
-        <div class="row parameter-row">
-          <div class="col-md-6">
-            <div class="parameter-label">
-              Scaling 学习率
-              <i class="fas fa-question-circle parameter-help" title="Scaling learning rate"></i>
-            </div>
-            <div class="d-flex align-items-center">
-              <input
-                type="range"
-                class="form-range"
-                v-model.number="trainingParams.scaling_lr"
-                min="0.0001"
-                max="0.01"
-                step="0.0001"
-              >
-              <span class="range-value ms-2">{{ trainingParams.scaling_lr }}</span>
-            </div>
-            <div class="parameter-description">默认值: 0.005</div>
-          </div>
+        <el-row :gutter="20" class="parameter-row">
+          <el-col :span="12">
+            <el-form-item>
+              <template #label>
+                <span>
+                  Scaling 学习率
+                  <el-tooltip content="Scaling learning rate" placement="top">
+                    <el-icon><QuestionFilled /></el-icon>
+                  </el-tooltip>
+                </span>
+              </template>
+              <div style="display: flex; align-items: center;">
+                <el-slider
+                  v-model="trainingParams.scaling_lr"
+                  :min="0.0001"
+                  :max="0.01"
+                  :step="0.0001"
+                  style="flex: 1; margin-right: 12px;"
+                />
+                <span class="range-value">{{ trainingParams.scaling_lr }}</span>
+              </div>
+              <div class="parameter-description">默认值: 0.005</div>
+            </el-form-item>
+          </el-col>
 
-          <div class="col-md-6">
-            <div class="parameter-label">
-              旋转学习率
-              <i class="fas fa-question-circle parameter-help" title="Rotation learning rate"></i>
-            </div>
-            <div class="d-flex align-items-center">
-              <input
-                type="range"
-                class="form-range"
-                v-model.number="trainingParams.rotation_lr"
-                min="0.0001"
-                max="0.01"
-                step="0.0001"
-              >
-              <span class="range-value ms-2">{{ trainingParams.rotation_lr }}</span>
-            </div>
-            <div class="parameter-description">默认值: 0.001</div>
-          </div>
-        </div>
+          <el-col :span="12">
+            <el-form-item>
+              <template #label>
+                <span>
+                  旋转学习率
+                  <el-tooltip content="Rotation learning rate" placement="top">
+                    <el-icon><QuestionFilled /></el-icon>
+                  </el-tooltip>
+                </span>
+              </template>
+              <div style="display: flex; align-items: center;">
+                <el-slider
+                  v-model="trainingParams.rotation_lr"
+                  :min="0.0001"
+                  :max="0.01"
+                  :step="0.0001"
+                  style="flex: 1; margin-right: 12px;"
+                />
+                <span class="range-value">{{ trainingParams.rotation_lr }}</span>
+              </div>
+              <div class="parameter-description">默认值: 0.001</div>
+            </el-form-item>
+          </el-col>
+        </el-row>
 
-        <div class="row parameter-row">
-          <div class="col-md-6">
-            <div class="parameter-label">
-              Position LR Delay Multiplier
-              <i class="fas fa-question-circle parameter-help" title="Position learning rate multiplier (cf. Plenoxels)"></i>
-            </div>
-            <div class="d-flex align-items-center">
-              <input
-                type="range"
-                class="form-range"
-                v-model.number="trainingParams.position_lr_delay_mult"
-                min="0.001"
-                max="0.1"
-                step="0.001"
-              >
-              <span class="range-value ms-2">{{ trainingParams.position_lr_delay_mult }}</span>
-            </div>
-            <div class="parameter-description">默认值: 0.01</div>  
-          </div>
+        <el-row :gutter="20" class="parameter-row">
+          <el-col :span="12">
+            <el-form-item>
+              <template #label>
+                <span>
+                  Position LR Delay Multiplier
+                  <el-tooltip content="Position learning rate multiplier (cf. Plenoxels)" placement="top">
+                    <el-icon><QuestionFilled /></el-icon>
+                  </el-tooltip>
+                </span>
+              </template>
+              <div style="display: flex; align-items: center;">
+                <el-slider
+                  v-model="trainingParams.position_lr_delay_mult"
+                  :min="0.001"
+                  :max="0.1"
+                  :step="0.001"
+                  style="flex: 1; margin-right: 12px;"
+                />
+                <span class="range-value">{{ trainingParams.position_lr_delay_mult }}</span>
+              </div>
+              <div class="parameter-description">默认值: 0.01</div>
+            </el-form-item>
+          </el-col>
 
-          <div class="col-md-6">
-            <div class="parameter-label">
-              Position LR Max Steps
-              <i class="fas fa-question-circle parameter-help" title="Number of steps where position learning rate goes from initial to final"></i>
-            </div>
-            <input
-              type="number"
-              class="form-control"
-              v-model.number="trainingParams.position_lr_max_steps"
-              min="1000"
-              max="100000"
-            >
-            <div class="parameter-description">默认值: 30,000</div>
-          </div>
-        </div>
+          <el-col :span="12">
+            <el-form-item>
+              <template #label>
+                <span>
+                  Position LR Max Steps
+                  <el-tooltip content="Number of steps where position learning rate goes from initial to final" placement="top">
+                    <el-icon><QuestionFilled /></el-icon>
+                  </el-tooltip>
+                </span>
+              </template>
+              <el-input-number
+                v-model="trainingParams.position_lr_max_steps"
+                :min="1000"
+                :max="100000"
+                style="width: 100%;"
+              />
+              <div class="parameter-description">默认值: 30,000</div>
+            </el-form-item>
+          </el-col>
+        </el-row>
       </div>
 
       <!-- 密度化参数 -->
-      <div class="parameter-group">
-        <h6 class="mb-3">密集化参数</h6>
+      <el-card class="parameter-group">
+        <template #header>
+          <h6>密集化参数</h6>
+        </template>
 
-        <div class="row parameter-row">
-          <div class="col-md-6">
-            <div class="parameter-label">
-              Densify From Iteration
-              <i class="fas fa-question-circle parameter-help" title="Iteration where densification starts"></i>
-            </div>
-            <input
-              type="number"
-              class="form-control"
-              v-model.number="trainingParams.densify_from_iter"
-              min="0"
-              max="10000"
-            >
-            <div class="parameter-description">默认值: 500</div>
-          </div>
+        <el-row :gutter="20" class="parameter-row">
+          <el-col :span="12">
+            <el-form-item>
+              <template #label>
+                <span>
+                  Densify From Iteration
+                  <el-tooltip content="Iteration where densification starts" placement="top">
+                    <el-icon><QuestionFilled /></el-icon>
+                  </el-tooltip>
+                </span>
+              </template>
+              <el-input-number
+                v-model="trainingParams.densify_from_iter"
+                :min="0"
+                :max="10000"
+                style="width: 100%;"
+              />
+              <div class="parameter-description">默认值: 500</div>
+            </el-form-item>
+          </el-col>
 
-          <div class="col-md-6">
-            <div class="parameter-label">
-              密集化停止迭代轮数
-              <i class="fas fa-question-circle parameter-help" title="Iteration where densification stops"></i>
-            </div>
-            <input
-              type="number"
-              class="form-control"
-              v-model.number="trainingParams.densify_until_iter"
-              min="1000"
-              max="30000"
-            >
-            <div class="parameter-description">默认值: 15,000</div>
-          </div>
-        </div>
+          <el-col :span="12">
+            <el-form-item>
+              <template #label>
+                <span>
+                  密集化停止迭代轮数
+                  <el-tooltip content="Iteration where densification stops" placement="top">
+                    <el-icon><QuestionFilled /></el-icon>
+                  </el-tooltip>
+                </span>
+              </template>
+              <el-input-number
+                v-model="trainingParams.densify_until_iter"
+                :min="1000"
+                :max="30000"
+                style="width: 100%;"
+              />
+              <div class="parameter-description">默认值: 15,000</div>
+            </el-form-item>
+          </el-col>
+        </el-row>
 
-        <div class="row parameter-row">
-          <div class="col-md-6">
-            <div class="parameter-label">
-              密集化间隔
-              <i class="fas fa-question-circle parameter-help" title="How frequently to densify (iterations)"></i>
-            </div>
-            <input
-              type="number"
-              class="form-control"
-              v-model.number="trainingParams.densification_interval"
-              min="10"
-              max="1000"
-            >
-            <div class="parameter-description">默认值: 100</div>
-          </div>
+        <el-row :gutter="20" class="parameter-row">
+          <el-col :span="12">
+            <el-form-item>
+              <template #label>
+                <span>
+                  密集化间隔
+                  <el-tooltip content="How frequently to densify (iterations)" placement="top">
+                    <el-icon><QuestionFilled /></el-icon>
+                  </el-tooltip>
+                </span>
+              </template>
+              <el-input-number
+                v-model="trainingParams.densification_interval"
+                :min="10"
+                :max="1000"
+                style="width: 100%;"
+              />
+              <div class="parameter-description">默认值: 100</div>
+            </el-form-item>
+          </el-col>
 
-          <div class="col-md-6">
-            <div class="parameter-label">
-              不透明度重置间隔
-              <i class="fas fa-question-circle parameter-help" title="How frequently to reset opacity (iterations)"></i>
-            </div>
-            <input
-              type="number"
-              class="form-control"
-              v-model.number="trainingParams.opacity_reset_interval"
-              min="100"
-              max="10000"
-            >
-            <div class="parameter-description">默认值: 3,000</div>
-          </div>
-        </div>
+          <el-col :span="12">
+            <el-form-item>
+              <template #label>
+                <span>
+                  不透明度重置间隔
+                  <el-tooltip content="How frequently to reset opacity (iterations)" placement="top">
+                    <el-icon><QuestionFilled /></el-icon>
+                  </el-tooltip>
+                </span>
+              </template>
+              <el-input-number
+                v-model="trainingParams.opacity_reset_interval"
+                :min="100"
+                :max="10000"
+                style="width: 100%;"
+              />
+              <div class="parameter-description">默认值: 3,000</div>
+            </el-form-item>
+          </el-col>
+        </el-row>
 
-        <div class="row parameter-row">
-          <div class="col-md-6">
-            <div class="parameter-label">
-              密集化梯度阈值
-              <i class="fas fa-question-circle parameter-help" title="Limit that decides if points should be densified based on 2D position gradient"></i>
-            </div>
-            <div class="d-flex align-items-center">
-              <input
-                type="range"
-                class="form-range"
-                v-model.number="trainingParams.densify_grad_threshold"
-                min="0.00001"
-                max="0.001"
-                step="0.00001"
-              >
-              <span class="range-value ms-2">{{ trainingParams.densify_grad_threshold }}</span>
-            </div>
-            <div class="parameter-description">默认值: 0.0002</div>
-          </div>
+        <el-row :gutter="20" class="parameter-row">
+          <el-col :span="12">
+            <el-form-item>
+              <template #label>
+                <span>
+                  密集化梯度阈值
+                  <el-tooltip content="Limit that decides if points should be densified based on 2D position gradient" placement="top">
+                    <el-icon><QuestionFilled /></el-icon>
+                  </el-tooltip>
+                </span>
+              </template>
+              <div style="display: flex; align-items: center;">
+                <el-slider
+                  v-model="trainingParams.densify_grad_threshold"
+                  :min="0.00001"
+                  :max="0.001"
+                  :step="0.00001"
+                  style="flex: 1; margin-right: 12px;"
+                />
+                <span class="range-value">{{ trainingParams.densify_grad_threshold }}</span>
+              </div>
+              <div class="parameter-description">默认值: 0.0002</div>
+            </el-form-item>
+          </el-col>
 
-          <div class="col-md-6">
-            <div class="parameter-label">
-              密集化百分比
-              <i class="fas fa-question-circle parameter-help" title="Percentage of scene extent a point must exceed to be forcibly densified"></i>
-            </div>
-            <div class="d-flex align-items-center">
-              <input
-                type="range"
-                class="form-range"
-                v-model.number="trainingParams.percent_dense"
-                min="0.001"
-                max="0.1"
-                step="0.001"
-              >
-              <span class="range-value ms-2">{{ trainingParams.percent_dense }}</span>
-            </div>
-            <div class="parameter-description">默认值: 0.01</div>
-          </div>
-        </div>
-      </div>
+          <el-col :span="12">
+            <el-form-item>
+              <template #label>
+                <span>
+                  密集化百分比
+                  <el-tooltip content="Percentage of scene extent a point must exceed to be forcibly densified" placement="top">
+                    <el-icon><QuestionFilled /></el-icon>
+                  </el-tooltip>
+                </span>
+              </template>
+              <div style="display: flex; align-items: center;">
+                <el-slider
+                  v-model="trainingParams.percent_dense"
+                  :min="0.001"
+                  :max="0.1"
+                  :step="0.001"
+                  style="flex: 1; margin-right: 12px;"
+                />
+                <span class="range-value">{{ trainingParams.percent_dense }}</span>
+              </div>
+              <div class="parameter-description">默认值: 0.01</div>
+            </el-form-item>
+          </el-col>
+        </el-row>
+      </el-card>
 
       <!-- 其他参数 -->
-      <div class="parameter-group">
-        <h6 class="mb-3">其他参数</h6>
+      <el-card class="parameter-group">
+        <template #header>
+          <h6>其他参数</h6>
+        </template>
 
-        <div class="row parameter-row">
-          <div class="col-md-6">
-            <div class="parameter-label">
-              Lambda DSSIM
-              <i class="fas fa-question-circle parameter-help" title="Influence of SSIM on total loss from 0 to 1"></i>
-            </div>
-            <div class="d-flex align-items-center">
-              <input
-                type="range"
-                class="form-range"
-                v-model.number="trainingParams.lambda_dssim"
-                min="0"
-                max="1"
-                step="0.01"
-              >
-              <span class="range-value ms-2">{{ trainingParams.lambda_dssim }}</span>
-            </div>
-            <div class="parameter-description">默认值 0.2</div>
-          </div>
+        <el-row :gutter="20" class="parameter-row">
+          <el-col :span="12">
+            <el-form-item>
+              <template #label>
+                <span>
+                  Lambda DSSIM
+                  <el-tooltip content="Influence of SSIM on total loss from 0 to 1" placement="top">
+                    <el-icon><QuestionFilled /></el-icon>
+                  </el-tooltip>
+                </span>
+              </template>
+              <div style="display: flex; align-items: center;">
+                <el-slider
+                  v-model="trainingParams.lambda_dssim"
+                  :min="0"
+                  :max="1"
+                  :step="0.01"
+                  style="flex: 1; margin-right: 12px;"
+                />
+                <span class="range-value">{{ trainingParams.lambda_dssim }}</span>
+              </div>
+              <div class="parameter-description">默认值 0.2</div>
+            </el-form-item>
+          </el-col>
 
-          <div class="col-md-6">
-            <div class="parameter-label">
-              测试迭代
-              <i class="fas fa-question-circle parameter-help" title="Iterations at which to compute L1 and PSNR over test set"></i>
-            </div>
-            <input
-              type="text"
-              class="form-control"
-              v-model="testIterationsInput"
-              placeholder="e.g., 7000 30000"
-            >
-            <div class="parameter-description">默认值: 7000 30000</div>
-          </div>
-        </div>
+          <el-col :span="12">
+            <el-form-item>
+              <template #label>
+                <span>
+                  测试迭代
+                  <el-tooltip content="Iterations at which to compute L1 and PSNR over test set" placement="top">
+                    <el-icon><QuestionFilled /></el-icon>
+                  </el-tooltip>
+                </span>
+              </template>
+              <el-input
+                v-model="testIterationsInput"
+                placeholder="e.g., 7000 30000"
+              />
+              <div class="parameter-description">默认值: 7000 30000</div>
+            </el-form-item>
+          </el-col>
+        </el-row>
 
-        <div class="row parameter-row">
-          <div class="col-md-6">
-            <div class="parameter-label">
-              保存迭代次数
-              <i class="fas fa-question-circle parameter-help" title="Iterations at which to save the Gaussian model"></i>
-            </div>
-            <input
-              type="text"
-              class="form-control"
-              v-model="saveIterationsInput"
-              placeholder="e.g., 7000 30000"
-            >
-            <div class="parameter-description">默认值: 7000 30000</div> 
-          </div>
+        <el-row :gutter="20" class="parameter-row">
+          <el-col :span="12">
+            <el-form-item>
+              <template #label>
+                <span>
+                  保存迭代次数
+                  <el-tooltip content="Iterations at which to save the Gaussian model" placement="top">
+                    <el-icon><QuestionFilled /></el-icon>
+                  </el-tooltip>
+                </span>
+              </template>
+              <el-input
+                v-model="saveIterationsInput"
+                placeholder="e.g., 7000 30000"
+              />
+              <div class="parameter-description">默认值: 7000 30000</div>
+            </el-form-item>
+          </el-col>
 
-          <div class="col-md-6">
-            <div class="parameter-label">
-              检查点迭代次数
-              <i class="fas fa-question-circle parameter-help" title="Iterations at which to store a checkpoint for continuing later"></i>
-            </div>
-            <input
-              type="text"
-              class="form-control"
-              v-model="checkpointIterationsInput"
-              placeholder="e.g., 5000 15000 25000"
-            >
-            <div class="parameter-description">可选，空格分隔的值</div>
-          </div>
-        </div>
+          <el-col :span="12">
+            <el-form-item>
+              <template #label>
+                <span>
+                  检查点迭代次数
+                  <el-tooltip content="Iterations at which to store a checkpoint for continuing later" placement="top">
+                    <el-icon><QuestionFilled /></el-icon>
+                  </el-tooltip>
+                </span>
+              </template>
+              <el-input
+                v-model="checkpointIterationsInput"
+                placeholder="e.g., 5000 15000 25000"
+              />
+              <div class="parameter-description">可选，空格分隔的值</div>
+            </el-form-item>
+          </el-col>
+        </el-row>
 
-        <div class="row parameter-row">
-          <div class="col-md-6">
-            <div class="form-check">
-              <input class="form-check-input" type="checkbox" v-model="trainingParams.quiet" id="quietOption">
-              <label class="form-check-label" for="quietOption">
+        <el-row :gutter="20" class="parameter-row">
+          <el-col :span="12">
+            <el-form-item>
+              <el-checkbox v-model="trainingParams.quiet">
                 安静模式
-              </label>
-            </div>
-            <div class="parameter-description">忽略任何写入标准输出的文本</div>
-          </div>
+              </el-checkbox>
+              <div class="parameter-description">忽略任何写入标准输出的文本</div>
+            </el-form-item>
+          </el-col>
 
-          <div class="col-md-6">
-            <div class="form-check">
-              <input class="form-check-input" type="checkbox" v-model="trainingParams.debug" id="debugOption">
-              <label class="form-check-label" for="debugOption">
+          <el-col :span="12">
+            <el-form-item>
+              <el-checkbox v-model="trainingParams.debug">
                 调试模式
-              </label>
-            </div>
-            <div class="parameter-description">如果遇到错误，启用调试模式</div>
-          </div>
-        </div>
-      </div>
+              </el-checkbox>
+              <div class="parameter-description">如果遇到错误，启用调试模式</div>
+            </el-form-item>
+          </el-col>
+        </el-row>
+      </el-card>
     </div>
 
     <!-- 训练控制区域 -->
-    <div class="parameter-section glass-card">
-      <h5>
-        <i class="fas fa-play-circle me-2"></i>
-        训练控制模块
-      </h5>
+    <el-card class="parameter-section">
+      <template #header>
+        <h5>
+          <el-icon><VideoPlay /></el-icon>
+          训练控制模块
+        </h5>
+      </template>
 
       <div v-if="!currentTask || !currentTask.task_id" class="training-actions">
-        <button
-          class="btn btn-primary btn-lg control-btn primary-btn"
+        <el-button
+          type="primary"
+          size="large"
           @click="startTraining"
           :disabled="!selectedFolder || isProcessing"
+          :loading="isProcessing"
+          class="control-btn"
         >
-          <i class="fas" :class="isProcessing ? 'fa-spinner fa-spin' : 'fa-play'"></i>
+          <el-icon v-if="!isProcessing"><VideoPlay /></el-icon>
           {{ isProcessing ? '正在训练' : '开始训练' }}
-        </button>
+        </el-button>
 
-        <button
-          class="btn btn-outline-secondary control-btn secondary-btn"
+        <el-button
+          type="default"
+          size="large"
           @click="resetParams"
           :disabled="isProcessing"
+          class="control-btn"
         >
-          <i class="fas fa-undo me-2"></i>
+          <el-icon><RefreshLeft /></el-icon>
           重置默认参数
-        </button>
+        </el-button>
 
-        <button
-          class="btn btn-outline-warning control-btn warning-btn"
+        <el-button
+          type="warning"
+          size="large"
           @click="forceReset"
           title="强制重置所有状态"
+          class="control-btn"
         >
-          <i class="fas fa-power-off me-2"></i>
+          <el-icon><SwitchButton /></el-icon>
           强制重置
-        </button>
+        </el-button>
       </div>
 
       <div v-else class="training-status">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-          <h5 class="mb-0">训练: {{ selectedFolder }}</h5>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+          <h5 style="margin: 0;">训练: {{ selectedFolder }}</h5>
           <div>
-            <span class="badge bg-primary ms-2">{{ currentTask.status }}</span>
+            <el-tag type="primary">{{ currentTask.status }}</el-tag>
           </div>
         </div>
 
-        <div class="alert" 
-            :class="{
-              'alert-info': currentTask.status === 'processing' || currentTask.status === 'running',
-              'alert-success': currentTask.status === 'completed',
-              'alert-danger': currentTask.status === 'failed',
-              'alert-warning': currentTask.status === 'cancelled'
-             }"
-             :style="{ fontSize: '1.05em', padding: '12px' }"
-        >
-          <i class="fas" :class="{
-            'fa-info-circle': currentTask.status === 'processing' || currentTask.status === 'running',
-            'fa-check-circle': currentTask.status === 'completed',
-            'fa-exclamation-circle': currentTask.status === 'failed',
-            'fa-ban': currentTask.status === 'cancelled'
-          }"></i>
-          {{ currentTask.message }}
+        <el-alert
+          :type="currentTask.status === 'processing' || currentTask.status === 'running' ? 'info' : 
+                currentTask.status === 'completed' ? 'success' : 
+                currentTask.status === 'failed' ? 'error' : 'warning'"
+          :title="currentTask.message"
+          :closable="false"
+          show-icon
+        />
+
+        <div v-if="currentTask.status === 'processing' || currentTask.status === 'running'" style="margin-top: 16px;">
+          <el-button type="danger" @click="cancelTask" class="control-btn">
+            <el-icon><VideoPause /></el-icon>
+            取消训练
+          </el-button>
         </div>
 
-        <div v-if="currentTask.status === 'processing' || currentTask.status === 'running'" class="mt-3">
-          <button class="btn btn-danger control-btn danger-btn" @click="cancelTask">
-            <i class="fas fa-stop me-2"></i>  取消训练
-          </button>
+        <div v-if="currentTask.status === 'completed'" style="margin-top: 16px;" class="action-buttons">
+          <el-button type="success" @click="viewResults" class="control-btn" style="margin-right: 8px;">
+            <el-icon><View /></el-icon>
+            查看结果
+          </el-button>
+          <el-button type="primary" @click="resetTaskState" class="control-btn">
+            <el-icon><Refresh /></el-icon>
+            训练其他模型
+          </el-button>
         </div>
 
-        <div v-if="currentTask.status === 'completed'" class="mt-3 action-buttons">
-          <button class="btn btn-success control-btn success-btn me-2" @click="viewResults">
-            <i class="fas fa-eye me-2"></i> 查看结果
-          </button>
-          <button class="btn btn-primary control-btn primary-btn" @click="resetTaskState">
-            <i class="fas fa-redo me-2"></i> 训练其他模型
-          </button>
-        </div>
-
-        <div v-if="currentTask.status === 'failed'" class="mt-3">
-          <div v-if="currentTask.error" class="alert alert-danger mb-3">
-            <strong>错误:</strong> {{ currentTask.error }}
-          </div>
-          <button class="btn btn-primary control-btn primary-btn" @click="resetTaskState">
-            <i class="fas fa-redo me-2"></i> 再次尝试
-          </button>
+        <div v-if="currentTask.status === 'failed'" style="margin-top: 16px;">
+          <el-alert
+            v-if="currentTask.error"
+            type="error"
+            :title="`错误: ${currentTask.error}`"
+            :closable="false"
+            style="margin-bottom: 16px;"
+          />
+          <el-button type="primary" @click="resetTaskState" class="control-btn">
+            <el-icon><Refresh /></el-icon>
+            再次尝试
+          </el-button>
         </div>
       </div>
-    </div>
+    </el-card>
 
     <!-- 训练历史记录 -->
-    <div class="parameter-section glass-card">
-      <h5>
-        <i class="fas fa-history me-2"></i>
-        训练历史记录
-      </h5>
+    <el-card class="parameter-section">
+      <template #header>
+        <h5>
+          <el-icon><Clock /></el-icon>
+          训练历史记录
+        </h5>
+      </template>
 
-      <div v-if="loadingResults" class="text-center py-3">
-        <div class="spinner-border text-primary" role="status">
-          <span class="visually-hidden">Loading...</span>
-        </div>
-        <p class="mt-2">加载历史训练...</p>
+      <div v-if="loadingResults" v-loading="true" style="text-align: center; padding: 40px;">
+        <p>加载历史训练...</p>
       </div>
 
-      <div v-else-if="results.length === 0" class="text-center py-3">
-        <i class="fas fa-history fa-3x text-muted mb-3"></i>
-        <p class="text-muted">没有找到历史文件夹</p>
-      </div>
+      <el-empty v-else-if="results.length === 0" description="没有找到历史文件夹">
+        <el-icon size="64"><Clock /></el-icon>
+      </el-empty>
 
-      <div v-else class="table-responsive">
-        <table class="table table-hover">
-          <thead>
-            <tr>
-              <th>Folder</th>
-              <th>Status</th>
-              <th>Training Time</th>
-              <th>Trained On</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="result in results" :key="result.task_id || result.folder_name">
-              <td>{{ result.folder_name }}</td>
-              <td>
-                <span class="badge" :class="{
-                  'bg-success': result.status === 'completed',
-                  'bg-danger': result.status === 'failed',
-                  'bg-warning': result.status === 'cancelled',
-                  'bg-secondary': result.status === 'unknown'
-                }">{{ result.status }}</span>
-              </td>
-              <td>{{ result.processing_time ? formatTime(result.processing_time) : 'N/A' }}</td>
-              <td>{{ result.timestamp ? formatDate(result.timestamp) : (result.created_time ? formatDate(result.created_time) : 'Unknown') }}</td>
-              <td>
-                <el-button
-                  type="danger"
-                  size="small"
-                  @click="confirmDeleteResult(result)"
-                  :icon="icons.Delete"
-                >
-                  删除
-                </el-button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
+      <el-table v-else :data="results" style="width: 100%">
+        <el-table-column prop="folder_name" label="Folder" />
+        <el-table-column prop="status" label="Status">
+          <template #default="scope">
+            <el-tag 
+              :type="scope.row.status === 'completed' ? 'success' : 
+                    scope.row.status === 'failed' ? 'danger' : 
+                    scope.row.status === 'cancelled' ? 'warning' : 'info'"
+            >
+              {{ scope.row.status }}
+            </el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column prop="processing_time" label="Training Time">
+          <template #default="scope">
+            {{ scope.row.processing_time ? formatTime(scope.row.processing_time) : 'N/A' }}
+          </template>
+        </el-table-column>
+        <el-table-column prop="timestamp" label="Trained On">
+          <template #default="scope">
+            {{ scope.row.timestamp ? formatDate(scope.row.timestamp) : (scope.row.created_time ? formatDate(scope.row.created_time) : 'Unknown') }}
+          </template>
+        </el-table-column>
+        <el-table-column label="Actions">
+          <template #default="scope">
+            <el-button
+              type="danger"
+              size="small"
+              @click="confirmDeleteResult(scope.row)"
+            >
+              <el-icon><Delete /></el-icon>
+              删除
+            </el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+    </el-card>
   </div>
 </template>
 
-<script >
+<script setup>
+import { ref, reactive, computed, watch, onMounted, onBeforeUnmount, shallowRef } from 'vue';
+import { useStore } from 'vuex';
+import { useRouter } from 'vue-router';
 import { eventBus } from '@/utils/eventBus';
 import { TrainingService } from '@/services/trainingService';
 import { TrainingParams } from '@/utils/trainingParams';
 import { TrainingUtils } from '@/utils/trainingUtils';
 import { ElNotification, ElMessage, ElMessageBox } from 'element-plus';
-import { shallowRef } from 'vue';
-import { Delete } from '@element-plus/icons-vue';
+import { 
+  Delete, 
+  QuestionFilled, 
+  VideoPlay, 
+  VideoPause, 
+  RefreshLeft, 
+  SwitchButton, 
+  View, 
+  Refresh, 
+  Clock 
+} from '@element-plus/icons-vue';
 import wsClient from '@/utils/WebSocketClient'; 
 
-export default {
-  name: 'TrainingComponent',
-  data() {
-    return {
-      loadingFolders: true,
-      loadingResults: true,
-      folders: [],
-      results: [],
-      selectedFolder: null,
-      selectedFolderDetails: null,
-      taskCheckInterval: null,
-      isProcessing: false,
-      httpError: null,
-      
-      // 添加状态监控计时器和计数器
-      stateMonitorInterval: null,
-      stateChangeCounter: 0,
-      lastTaskStatus: null,
-      lastStateChangeTime: null,
-      
-      // 用于处理空格分隔的迭代列表
-      testIterationsInput: "7000 30000",
-      saveIterationsInput: "7000 30000",
-      checkpointIterationsInput: "",
+// 使用 Vuex store 和 router
+const store = useStore();
+const router = useRouter();
 
-      // 使用默认训练参数
-      trainingParams: TrainingParams.getDefaultParams(),
-      
-      icons: {
-        Delete: shallowRef(Delete),
-      }
-    };
-  },
-  computed: {
-    username() {
-      return this.$store.getters.user?.username;
-    },
-    currentTask() {
-      // 从Vuex store获取当前训练任务状态
-      return this.$store.getters.trainingCurrentTask || {
-        task_id: null,
-        status: 'idle', // 'idle', 'running', 'processing', 'completed', 'failed', 'cancelled'
-        progress: 0,
-        message: '',
-        output_logs: [],
-        start_time: null,
-        end_time: null,
-        folder_name: null,
-        model_path: null,
-        error: null,
-      };
-    },
+// 响应式数据
+const loadingFolders = ref(true);
+const loadingResults = ref(true);
+const folders = ref([]);
+const results = ref([]);
+const selectedFolder = ref(null);
+const selectedFolderDetails = ref(null);
+const taskCheckInterval = ref(null);
+const isProcessing = ref(false);
+const httpError = ref(null);
 
-    // 将输入字符串转换为数字数组
-    parsedTestIterations() {
-      return this.parseIterationString(this.testIterationsInput);
-    },
-    parsedSaveIterations() {
-      return this.parseIterationString(this.saveIterationsInput);
-    },
-    parsedCheckpointIterations() {
-      return this.parseIterationString(this.checkpointIterationsInput);
+// 添加状态监控计时器和计数器
+const stateMonitorInterval = ref(null);
+const stateChangeCounter = ref(0);
+const lastTaskStatus = ref(null);
+const lastStateChangeTime = ref(null);
+
+// 用于处理空格分隔的迭代列表
+const testIterationsInput = ref("7000 30000");
+const saveIterationsInput = ref("7000 30000");
+const checkpointIterationsInput = ref("");
+
+// 使用默认训练参数
+const trainingParams = reactive(TrainingParams.getDefaultParams());
+
+// 图标
+const icons = {
+  Delete: shallowRef(Delete),
+  QuestionFilled: shallowRef(QuestionFilled),
+  VideoPlay: shallowRef(VideoPlay),
+  VideoPause: shallowRef(VideoPause),
+  RefreshLeft: shallowRef(RefreshLeft),
+  SwitchButton: shallowRef(SwitchButton),
+  View: shallowRef(View),
+  Refresh: shallowRef(Refresh),
+  Clock: shallowRef(Clock),
+};
+
+// 计算属性
+const username = computed(() => store.getters.user?.username);
+
+const currentTask = computed(() => {
+  // 从Vuex store获取当前训练任务状态
+  return store.getters.trainingCurrentTask || {
+    task_id: null,
+    status: 'idle', // 'idle', 'running', 'processing', 'completed', 'failed', 'cancelled'
+    progress: 0,
+    message: '',
+    output_logs: [],
+    start_time: null,
+    end_time: null,
+    folder_name: null,
+    model_path: null,
+    error: null,
+  };
+});
+
+// 将输入字符串转换为数字数组
+const parsedTestIterations = computed(() => parseIterationString(testIterationsInput.value));
+const parsedSaveIterations = computed(() => parseIterationString(saveIterationsInput.value));
+const parsedCheckpointIterations = computed(() => parseIterationString(checkpointIterationsInput.value));
+
+// 监听器
+watch(username, (newUsername, oldUsername) => {
+  if (newUsername && newUsername !== oldUsername) {
+    console.log(`[TrainingComponent] Username detected: ${newUsername}. Initializing component.`);
+    syncAndInitialize();
+  }
+});
+
+watch(currentTask, (newTask, oldTask) => {
+  if (newTask && newTask.task_id && (newTask.status === 'running' || newTask.status === 'processing')) {
+    if (!taskCheckInterval.value) {
+      startTaskStatusPolling(newTask.task_id);
     }
-  },
-  watch: {
-    username(newUsername, oldUsername) {
-      if (newUsername && newUsername !== oldUsername) {
-        console.log(`[TrainingComponent] Username detected: ${newUsername}. Initializing component.`);
-        this.syncAndInitialize();
-      }
-    },
-    currentTask(newTask, oldTask) {
-      if (newTask && newTask.task_id && (newTask.status === 'running' || newTask.status === 'processing')) {
-        if (!this.taskCheckInterval) {
-          this.startTaskStatusPolling(newTask.task_id);
-        }
-      } else if (oldTask && oldTask.task_id && (oldTask.status === 'running' || oldTask.status === 'processing')) {
-        // If task is no longer running/processing, clear interval
-         if (newTask.status === 'completed' || newTask.status === 'failed' || newTask.status === 'cancelled' || !newTask.task_id) {
-          this.clearTaskCheckInterval();
-        }
-      }
-    },
-    // 监听输入变化，更新参数
-    testIterationsInput() {
-      this.trainingParams.test_iterations = this.parsedTestIterations;
-    },
-    saveIterationsInput() {
-      this.trainingParams.save_iterations = this.parsedSaveIterations;
-    },
-    checkpointIterationsInput() {
-      this.trainingParams.checkpoint_iterations = this.parsedCheckpointIterations;
-    },
-  },
-  mounted() {
-    // Initial data fetch if username is already available
-    if (this.username) {
-      this.syncAndInitialize();
-    } else {
-      console.log('[TrainingComponent] Username not available on mount, waiting for it to be set in store.');
+  } else if (oldTask && oldTask.task_id && (oldTask.status === 'running' || oldTask.status === 'processing')) {
+    // If task is no longer running/processing, clear interval
+     if (newTask.status === 'completed' || newTask.status === 'failed' || newTask.status === 'cancelled' || !newTask.task_id) {
+      clearTaskCheckInterval();
     }
-    eventBus.on('point-cloud-processed', this.handlePointCloudProcessed);
+  }
+});
 
-    this.fetchTrainingResults();
-    this.fetchPointCloudFolders();
-    
-    // 连接WebSocket
-    const token = localStorage.getItem('token');
-    if(token && !wsClient.isConnected()) {
-        // 注意：这里的URL需要与您的后端SocketIO服务器地址一致
-        wsClient.connect('http://localhost:5000', token);
-    }
-    
-    // 监听文件夹更新事件
-    wsClient.on('folders_updated', this.handleFoldersUpdated);
-    
-    // 添加训练状态更新监听
-    wsClient.on('training_status_update', this.handleTrainingStatusUpdate);
-    
-    // 启动状态监控计时器
-    this.startStateMonitor();
-    eventBus.on('visualization-active', this.handleVisualizationActivity);
-  },
-  beforeUnmount() {
-    // 清理轮询和事件监听
-    this.clearTaskCheckInterval();
-    eventBus.off('point-cloud-processed', this.handlePointCloudProcessed);
-    eventBus.off('visualization-active', this.handleVisualizationActivity); // 添加这一行
-    // 移除所有监听并断开连接
-    wsClient.off('folders_updated');
-    wsClient.off('training_status_update');
-    if(wsClient.isConnected()) {
-        wsClient.disconnect();
-    }
-    
-    // 清理状态监控计时器
-    this.clearStateMonitor();
-  },
-  methods: {
-    async syncAndInitialize() {
-      await this.syncTaskWithBackend();
-      this.fetchFolders();
-      this.fetchResults();
-    },
-    handleVisualizationActivity() {
-      const task = this.currentTask;
-      
-      if (!task || !task.task_id || !['running', 'processing'].includes(task.status)) {
-        console.warn('Inconsistent state detected: Visualization is active, but UI shows no running task. Forcing state synchronization.');
-        this.syncTaskWithBackend();
-      }
-    },
-    async syncTaskWithBackend() {
-      console.log("Syncing task state with backend to prevent stale cache issues.");
-      try {
-        const username = this.getUsername();
-        if (!username) {
-            this.$store.dispatch('clearTrainingTask');
-            this.isProcessing = false;
-            return;
-        }
+// 监听输入变化，更新参数
+watch(testIterationsInput, () => {
+  trainingParams.test_iterations = parsedTestIterations.value;
+});
 
-        const response = await TrainingService.checkActiveTask(username);
-        const activeTask = (response && response.active_tasks && response.active_tasks.length > 0) ? response.active_tasks[0] : null;
+watch(saveIterationsInput, () => {
+  trainingParams.save_iterations = parsedSaveIterations.value;
+});
 
-        if (activeTask && ['running', 'processing'].includes(activeTask.status)) {
-            console.log(`Backend reports active task: ${activeTask.task_id} with status ${activeTask.status}`);
-            const taskData = {
-                task_id: activeTask.task_id,
-                status: activeTask.status,
-                progress: activeTask.progress || 0,
-                message: activeTask.message || 'Restored active task...',
-                output_logs: activeTask.output_logs || [],
-                start_time: activeTask.start_time,
-                folder_name: activeTask.folder_name || (activeTask.source_path ? activeTask.source_path.split('/').pop() : 'Unknown'),
-            };
-            this.$store.dispatch('setTrainingTask', taskData);
-            this.selectedFolder = taskData.folder_name;
-            this.isProcessing = true;
-        } else {
-            console.log("Backend reports no active tasks, or task is in a final state. Clearing local state.");
-            this.$store.dispatch('clearTrainingTask');
-            this.isProcessing = false;
-        }
-      } catch (error) {
-        console.error('Failed to sync task state with backend:', error);
-        this.$message.error('无法同步训练状态，将清除本地状态以避免界面卡死');
-        this.$store.dispatch('clearTrainingTask');
-        this.isProcessing = false;
-      }
-    },
+watch(checkpointIterationsInput, () => {
+  trainingParams.checkpoint_iterations = parsedCheckpointIterations.value;
+});
 
-    getUsername() {
-      return this.username;
-    },
+// 生命周期钩子
+onMounted(() => {
+  // Initial data fetch if username is already available
+  if (username.value) {
+    syncAndInitialize();
+  } else {
+    console.log('[TrainingComponent] Username not available on mount, waiting for it to be set in store.');
+  }
+  eventBus.on('point-cloud-processed', handlePointCloudProcessed);
 
-    async fetchFolders() {
-      this.loadingFolders = true;
-      this.httpError = null;
-      try {
-        const username = this.getUsername();
+  fetchTrainingResults();
+  fetchPointCloudFolders();
+  
+  // 连接WebSocket
+  const token = localStorage.getItem('token');
+  if(token && !wsClient.isConnected()) {
+      // 注意：这里的URL需要与您的后端SocketIO服务器地址一致
+      wsClient.connect('http://localhost:5000', token);
+  }
+  
+  // 监听文件夹更新事件
+  wsClient.on('folders_updated', handleFoldersUpdated);
+  
+  // 添加训练状态更新监听
+  wsClient.on('training_status_update', handleTrainingStatusUpdate);
+  
+  // 启动状态监控计时器
+  startStateMonitor();
+  eventBus.on('visualization-active', handleVisualizationActivity);
+});
 
-        const response = await TrainingService.getPointCloudResults(username);
-        this.handlePointCloudResultsResponse(response);
-        return this.folders;
-      } catch (error) {
-        this.httpError = 'Failed to load folders. Please check backend connection.';
-        this.$message.error(this.httpError);
-        return [];
-      } finally {
-        this.loadingFolders = false;
-      }
-    },
+onBeforeUnmount(() => {
+  // 清理轮询和事件监听
+  clearTaskCheckInterval();
+  eventBus.off('point-cloud-processed', handlePointCloudProcessed);
+  eventBus.off('visualization-active', handleVisualizationActivity);
+  // 移除所有监听并断开连接
+  wsClient.off('folders_updated');
+  wsClient.off('training_status_update');
+  if(wsClient.isConnected()) {
+      wsClient.disconnect();
+  }
+  
+  // 清理状态监控计时器
+  clearStateMonitor();
+});
+// 方法函数
+const syncAndInitialize = async () => {
+  await syncTaskWithBackend();
+  fetchFolders();
+  fetchResults();
+};
 
-    async fetchResults() {
-      this.loadingResults = true;
-      const username = this.getUsername();
-      if (!username) {
-        this.loadingResults = false;
+const handleVisualizationActivity = () => {
+  const task = currentTask.value;
+  
+  if (!task || !task.task_id || !['running', 'processing'].includes(task.status)) {
+    console.warn('Inconsistent state detected: Visualization is active, but UI shows no running task. Forcing state synchronization.');
+    syncTaskWithBackend();
+  }
+};
+
+const syncTaskWithBackend = async () => {
+  console.log("Syncing task state with backend to prevent stale cache issues.");
+  try {
+    const usernameValue = getUsername();
+    if (!usernameValue) {
+        store.dispatch('clearTrainingTask');
+        isProcessing.value = false;
         return;
-      }
-      
-      TrainingService.getTrainingResults(username)
-        .then(response => {
-          this.results = response.results || [];
-        })
-        .catch(error => {
-          console.error('获取训练结果失败:', error);
-          ElMessage.error('无法加载训练历史记录');
-          this.results = [];
-        })
-        .finally(() => {
-          this.loadingResults = false;
-        });
-    },
+    }
 
-    selectFolder(folder) {
-      this.selectedFolder = folder.folder_name || folder.name;
-      this.selectedFolderDetails = folder;
-    },
+    const response = await TrainingService.checkActiveTask(usernameValue);
+    const activeTask = (response && response.active_tasks && response.active_tasks.length > 0) ? response.active_tasks[0] : null;
 
-    parseIterationString(str) {
-      return TrainingParams.parseIterations(str);
-    },
-
-    resetParams() {
-      this.trainingParams = TrainingParams.getDefaultParams();
-      this.testIterationsInput = "7000 30000";
-      this.saveIterationsInput = "7000 30000";
-      this.checkpointIterationsInput = "";
-      ElNotification({
-        title: '操作成功',
-        message: '所有训练参数已恢复默认设置',
-        type: 'success',
-        position: 'top-right',
-        duration: 2000,
-        showClose: true
-      });
-    },
-
-    async startTraining() {
-      const folderValidation = TrainingUtils.validateFolderSelection(this.selectedFolderDetails);
-      if (!folderValidation.isValid) {
-        ElNotification({
-          title: '操作失败',
-          message: folderValidation.error,
-          type: 'error',
-          position: 'top-right',
-          duration: 2000,
-          showClose: true
-        });
-        return;
-      }
-
-      this.isProcessing = true;
-      this.httpError = null;
-      
-      // 重置状态监控计数器
-      this.resetStateMonitorCounters();
-
-      try {
-        const username = this.getUsername();
-        const sourcePath = this.selectedFolderDetails.output_folder;
-
-        const paramValidation = TrainingParams.validateParams(this.trainingParams);
-        if (!paramValidation.isValid) {
-          ElNotification({
-            title: '操作失败',
-            message: '参数验证失败: ' + paramValidation.errors.join(', '),
-            type: 'error',
-            position: 'top-right',
-            duration: 2000,
-            showClose: true
-          });
-          this.isProcessing = false; // 终止处理
-          return;
-        }
-
-        // 格式化参数
-        const cleanParams = TrainingParams.formatParamsForAPI(this.trainingParams);
-
-        // 添加WebSocket配置到参数中
-        cleanParams.ip = 'localhost';
-        cleanParams.port = 6009;
-        
-        // 构造任务数据
+    if (activeTask && ['running', 'processing'].includes(activeTask.status)) {
+        console.log(`Backend reports active task: ${activeTask.task_id} with status ${activeTask.status}`);
         const taskData = {
-          username: username,
-          source_path: sourcePath,
-          websocket_port: 6009, 
-          websocket_host: 'localhost', 
-          params: cleanParams
-        };
-
-        const response = await TrainingService.startTraining(taskData);
-        this.handleStartTrainingResponse(response);
-      } catch (error) {
-        this.httpError = `Failed to start training: ${error.message}`;
-        ElNotification({
-          title: '操作失败',
-          message: this.httpError,
-          type: 'error',
-          position: 'top-right',
-          duration: 2000,
-          showClose: true
-        });
-        this.$store.dispatch('setTrainingTask', { status: 'failed', message: this.httpError, error: this.httpError });
-      } finally {
-        this.isProcessing = false;
-      }
-    },
-
-    handleStartTrainingResponse(data) {
-      if (data && data.task_id) {
-
-        const taskData = {
-          task_id: data.task_id,
-          status: data.status || 'running', 
-          progress: 0,
-          message: data.message || 'Training started...',
-          output_logs: [],
-          start_time: new Date().toISOString(),
-          folder_name: this.selectedFolder,
-          model_path: data.model_path,
-          visualization_url: data.visualization ? `http://${data.visualization.host}:${data.visualization.port}` : null,
-          websocket: data.websocket || { 
-            host: 'localhost',
-            port: 6009
-          }
-        };
-        this.$store.dispatch('setTrainingTask', taskData);
-        ElNotification({
-          title: '操作成功',
-          message: '训练任务已成功启动',
-          type: 'success',
-          position: 'bottom-right',
-          customClass: 'custom-notification',
-          duration: 3000
-        });
-      } else {
-        this.$message.error('训练失败: 服务器响应无效。');
-        this.$store.dispatch('setTrainingTask', { status: 'failed', message: 'Invalid server response on start.' });
-      }
-    },
-
-    startTaskStatusPolling(taskId) {
-      // 如果WebSocket已连接，则注册任务监听
-      if (wsClient.isConnected()) {
-        wsClient.emit('register_task_updates', {
-          username: this.getUsername(),
-          task_id: taskId
-        });
-      } else {
-        // 如果WebSocket未连接，回退到HTTP轮询实现
-        this.fallbackToHttpPolling(taskId);
-      }
-    },
-    
-    fallbackToHttpPolling(taskId) {
-      if (this.taskCheckInterval) {
-        clearInterval(this.taskCheckInterval);
-      }
-      
-      this.taskCheckInterval = setInterval(async () => {
-        try {
-          const response = await TrainingService.getTrainingStatus(this.getUsername(), taskId);
-          this.handleTrainingStatusUpdate(response);
-        } catch (error) {
-          console.error('轮询任务状态时发生错误:', error);
-          if (error.status === 404) {
-            this.$message.error('服务器上找不到任务。停止更新。');
-            this.clearTaskCheckInterval();
-            this.$store.dispatch('setTrainingTask', { ...this.currentTask, status: 'failed', message: '服务器上找不到任务。' });
-          }
-        }
-      }, 3000); // 每3秒轮询一次
-    },
-    
-    // 修改clearTaskCheckInterval方法
-    clearTaskCheckInterval() {
-      if (this.taskCheckInterval) {
-        clearInterval(this.taskCheckInterval);
-        this.taskCheckInterval = null;
-      }
-      
-      // 如果WebSocket已连接，则取消任务更新
-      if (wsClient.isConnected() && this.currentTask && this.currentTask.task_id) {
-        wsClient.emit('unregister_task_updates', {
-          username: this.getUsername(),
-          task_id: this.currentTask.task_id
-        });
-      }
-    },
-
-    async checkActiveTask() {
-      // This method will check if there's an active task for the user when the component mounts.
-      try {
-        const username = this.getUsername();
-        const response = await TrainingService.checkActiveTask(username);
-        
-        if (response && response.active_tasks && response.active_tasks.length > 0) {
-          const activeTask = response.active_tasks[0]; // Assuming one active task per user for now    
-          
-          this.selectedFolder = activeTask.folder_name || (activeTask.source_path ? activeTask.source_path.split('/').pop() : 'Unknown');
-
-          const taskData = {
             task_id: activeTask.task_id,
             status: activeTask.status,
             progress: activeTask.progress || 0,
             message: activeTask.message || 'Restored active task...',
             output_logs: activeTask.output_logs || [],
             start_time: activeTask.start_time,
-            folder_name: this.selectedFolder,
-            // model_path might not be available in active_tasks, depends on backend
-          };
-          this.$store.dispatch('setTrainingTask', taskData);
-          // Polling will be started by the watcher
-        } else {
-          console.log('No active training tasks found for user on mount.');
-           // Ensure any lingering task in Vuex is cleared if backend says no active tasks
-          if (this.currentTask && this.currentTask.task_id && (this.currentTask.status === 'running' || this.currentTask.status === 'processing')) {
-            this.$store.dispatch('clearTrainingTask');
-      }
-        }
-      } catch (error) {
-        console.error('Error checking for active tasks:', error.response ? error.response.data : error.message);
-        this.$message.error('Failed to check for active tasks.');
-      }
-    },
-
-    async cancelTask() {
-      if (!this.currentTask || !this.currentTask.task_id) {
-        this.$message.warn('No active task to cancel.');
-        return;
-      }
-
-      this.isProcessing = true; // Indicate processing start
-
-      try {
-        const username = this.getUsername();
-        const taskId = this.currentTask.task_id;
-      
-        // Immediately stop local polling to prevent race conditions
-        this.clearTaskCheckInterval();
-        
-        const response = await TrainingService.cancelTraining(username, taskId);
-        this.handleCancelTaskResponse(response);
-
-      } catch (error) {
-        console.error('Error cancelling task:', error.response ? error.response.data : error.message);
-        this.httpError = `Failed to cancel task: ${error.response?.data?.error || error.message}`;
-        this.$message.error(this.httpError);
-        // Even if API call fails, update local state to reflect cancellation attempt
-        const currentTaskState = this.$store.getters.trainingCurrentTask;
-        this.$store.dispatch('setTrainingTask', { ...currentTaskState, status: 'failed', message: 'Cancellation failed.', error: this.httpError });
-      } finally {
-        this.isProcessing = false; // Indicate processing end
-      }
-    },
-    
-    handleCancelTaskResponse(data) {
-      ElNotification({
-        title: '任务取消',
-        message: data.message || '任务取消请求已成功发送',
-        type: 'info',
-        position: 'top-right',
-        duration: 3000,
-        showClose: true,
-        customClass: 'custom-notification'
-      });
-      
-      // Update task state in Vuex to 'cancelled'
-      // The backend should eventually confirm this state via polling if cancellation is async
-      // Or, if backend confirms immediately, this is fine.
-      const currentTaskState = this.$store.getters.trainingCurrentTask;
-      this.$store.dispatch('setTrainingTask', { 
-        ...currentTaskState, 
-        status: 'cancelled', 
-        message: data.message || 'Task cancelled by user.',
-        end_time: new Date().toISOString()
-      });
-
-      this.isProcessing = false; // Reset processing flag
-      this.clearTaskCheckInterval(); // Ensure polling stops
-      
-      // Delay reset to allow user to see status, then refresh results
-      setTimeout(() => {
-        this.resetTaskState(); 
-        this.fetchResults();
-        this.fetchFolders(); // Refresh folders as well
-      }, 1500);
-    },
-
-    resetTaskState() {
-      this.$store.dispatch('clearTrainingTask'); // Clears the task from Vuex
-      this.selectedFolder = null;
-      this.selectedFolderDetails = null;
-      this.isProcessing = false;
-      this.httpError = null;
-      this.clearTaskCheckInterval(); // Ensure polling stops
-      this.$message.info('准备开始新的训练任务。');
-    },
-
-    checkAndCleanInvalidState() {
-      const task = this.$store.getters.trainingCurrentTask;
-      
-      // 状态一致性检查 - 如果没有任务但isProcessing为true，重置它
-      if ((!task || !task.task_id) && this.isProcessing) {
-        console.warn('检测到无效状态：isProcessing=true但没有训练任务');
-        this.isProcessing = false;
-      }
-      
-      if (task && task.task_id && (task.status === 'running' || task.status === 'processing')) {
-        // 这里应该显示任务ID
-        this.verifyTaskStatusWithBackend(task.task_id);
-      } else if (task && (task.status === 'cancelled' || task.status === 'failed' || task.status === 'completed')) {
-        this.resetTaskState();
-      }
-    },
-
-    async verifyTaskStatusWithBackend(taskId) {
-      try {
-        const username = this.getUsername();
-        const backendTaskStatus = await TrainingService.getTrainingStatus(username, taskId);
-
-        if (backendTaskStatus && (backendTaskStatus.status === 'running' || backendTaskStatus.status === 'processing')) {
-          this.$store.dispatch('setTrainingTask', { ...this.currentTask, ...backendTaskStatus });
-          // Polling will be started/managed by the watcher
-        } else {
-          console.log(`Task ${taskId} is not active on backend (status: ${backendTaskStatus?.status}). Clearing from store.`);
-          this.$store.dispatch('clearTrainingTask');
-        }
-      } catch (error) {
-        console.error(`Error verifying task ${taskId} with backend:`, error.response ? error.response.data : error.message);
-        if (error.response && error.response.status === 404) {
-           console.log(`Task ${taskId} not found on backend. Clearing from store.`);
-           this.$store.dispatch('clearTrainingTask');
-        }
-      }
-    },
-
-    forceReset() {
-
-      this.clearTaskCheckInterval();
-      this.resetTaskState(); // This now clears Vuex and resets local component state
-      ElNotification({
-          title: '操作成功',
-          message: '所有训练状态已重置',
-          type: 'success',
-          position: 'top-right',
-          customClass: 'custom-notification',
-          duration: 2000
-        });
-      this.fetchFolders(); // Refresh folder list
-      this.fetchResults(); // Refresh history
-    },
-
-    handlePointCloudProcessed(processedData) {
-
-      this.fetchFolders().then(() => {
-        const folder = this.folders.find(f => f.output_folder === processedData.output_folder);
-        if (folder) {
-          this.selectFolder(folder);
-          ElNotification({
-            title: '操作成功',
-            message: `自动选择新处理的文件夹: ${folder.folder_name || folder.name}`,
-            type: 'success',
-            position: 'top-right',
-            duration: 2000,
-            showClose: true
-          });
-        }
-      });
-    },
-
-    formatDate(timestamp) {
-      if (!timestamp) return 'Unknown';
-      const date = new Date( (typeof timestamp === 'number' && timestamp < 10000000000) ? timestamp * 1000 : timestamp);
-      return date.toLocaleString();
-    },
-
-    formatTime(seconds) {
-      if (seconds === null || seconds === undefined || isNaN(seconds)) return 'N/A';
-      const h = Math.floor(seconds / 3600);
-      const m = Math.floor((seconds % 3600) / 60);
-      const s = Math.floor(seconds % 60);
-      return [
-        h > 0 ? `${h}h` : '',
-        m > 0 ? `${m}m` : '',
-        s > 0 ? `${s}s` : ''
-      ].filter(Boolean).join(' ') || '0s';
-    },
-
-    handlePointCloudResultsResponse(responseData) {
-      const data = responseData.data || responseData;
-      if (data && data.results && Array.isArray(data.results)) {
-        this.folders = data.results || [];
-        if (this.folders.length === 0) {
-          console.warn('No completed point cloud folders found from API.');
-        }
-      } else {
-        console.error('Invalid point cloud results structure:', data);
-        this.folders = [];
-        this.$message.error('Failed to parse point cloud folder list.');
-      }
-    },
-
-    async confirmDeleteResult(result) {
-      try {
-        await ElMessageBox.confirm(
-          `您确定要永久删除训练结果文件夹 "${result.folder_name}" 及其所有内容吗？此操作不可逆。`,
-          '警告',
-          {
-            confirmButtonText: '确定删除',
-            cancelButtonText: '取消',
-            type: 'warning',
-          }
-        );
-        this.deleteResult(result);
-      } catch (e) {
-        ElMessage.info('删除操作已取消');
-      }
-    },
-
-    async deleteResult(result) {
-      try {
-        const folderName = result.folder_name;
-
-        // 检查WebSocket连接
-        if (!wsClient.isConnected()) {
-          ElNotification({
-            title: '操作失败',
-            message: 'WebSocket未连接，请刷新页面重试',
-            type: 'error',
-            position: 'top-right',
-            duration: 2000
-          });
-          return;
-        }
-
-        // 显示加载中状态
-        ElMessage.info('正在删除文件夹，请稍候...');
-
-        const response = await wsClient.emitWithAck('delete_training_result', {
-          token: localStorage.getItem('token'),
-          folder_name: folderName,
-          folderType: 'models'
-        }, 30000);
-        console.log('删除文件夹响应:', response);
-        if (response && response.status === 'success') {
-          ElNotification({
-            title: '操作成功',
-            message: response.message || '删除请求已成功发送',
-            type: 'success',
-            position: 'top-right',
-            duration: 2000,
-            showClose: true
-          });
-          
-          // 刷新列表
-          this.fetchResults();
-        } else {
-          console.error('删除失败:', response);
-          ElNotification({
-            title: '操作失败',
-            message: response.message || '删除失败',
-            type: 'error',
-            position: 'top-right',
-            duration: 2000,
-            showClose: true
-          });
-        }
-      } catch (error) {
-        console.error('删除请求异常:', error);
-        ElNotification({
-          title: '操作失败',
-          message: error.message || '删除请求失败或超时',
-          type: 'error',
-          position: 'top-right',
-          duration: 2000,
-          showClose: true
-        });
-      }
-    },
-
-    async fetchPointCloudFolders() {
-      try {
-        const username = this.$store.getters.user?.username;
-        if (!username) {
-          return;
-        }
-        const response = await TrainingService.getPointCloudResults(username);
-        if (response && Array.isArray(response.results)) {
-          this.pointCloudFolders = response.results;
-        } else {
-          this.pointCloudFolders = [];
-        }
-      } catch (err) {
-        this.pointCloudFolders = [];
-        ElNotification({
-          title: '操作失败',
-          message: '无法加载已处理的点云文件夹列表。',
-          type: 'error',
-          position: 'top-right',
-          duration: 2000,
-          showClose: true
-        });
-      }
-    },
-
-    handleFoldersUpdated(data) {
-      const currentUser = this.$store.getters.user?.username;
-      if (data.username === currentUser) {
-        this.fetchTrainingResults();
-        this.fetchPointCloudFolders();
-
-      }
-    },
-
-    fetchTrainingResults() {
-      this.loadingResults = true;
-      const username = this.getUsername();
-      if (!username) {
-        this.loadingResults = false;
-        return;
-      }
-      
-      TrainingService.getTrainingResults(username)
-        .then(response => {
-          this.results = response.results || [];
-        })
-        .catch(error => {
-          console.error('获取训练结果失败:', error);
-          ElMessage.error('无法加载训练历史记录');
-          this.results = [];
-        })
-        .finally(() => {
-          this.loadingResults = false;
-        });
-    },
-
-    updateTaskStatus(updatedTask) {
-        const index = this.trainingResults.findIndex(t => t.task_id === updatedTask.task_id);
-        if (index !== -1) {
-            // 使用Vue的响应式方式更新数组元素
-            this.trainingResults.splice(index, 1, { ...this.trainingResults[index], ...updatedTask });
-        } else {
-            // 如果任务不在列表中，可能是新任务，则添加到列表
-            this.trainingResults.unshift(updatedTask);
-        }
-    },
-
-    handleTrainingStatusUpdate(data) {
-      if (!data) return;
-      
-      // 记录状态变化
-      this.recordStateChange(data.status);
-        
-      // 更新Vuex存储中的任务状态
-      const updatedTaskData = {
-        ...this.currentTask,
-        ...data
-      };
-      this.$store.dispatch('setTrainingTask', updatedTaskData);
-      if (['completed', 'failed', 'cancelled'].includes(data.status)) {
-        this.clearTaskCheckInterval();
-        this.isProcessing = false;
-        const finalTask = {
-          ...this.currentTask,
-          ...data,
-          end_time: data.end_time || new Date().toISOString()
+            folder_name: activeTask.folder_name || (activeTask.source_path ? activeTask.source_path.split('/').pop() : 'Unknown'),
         };
-        this.$store.dispatch('setTrainingTask', finalTask);
-        if (data.status === 'cancelled') {
-          setTimeout(() => this.resetTaskState(), 1500);
-        }
-        this.fetchResults();
-      }
-    },
-    
-    // 添加状态监控相关方法
-    startStateMonitor() {
-      // 清除任何现有的监控器
-      this.clearStateMonitor();
-      
-      // 设置初始状态
-      this.lastTaskStatus = this.currentTask?.status || 'idle';
-      this.lastStateChangeTime = Date.now();
-      this.stateChangeCounter = 0;
-      
-      // 创建新的监控器 - 每10秒检查一次状态
-      this.stateMonitorInterval = setInterval(() => {
-        this.checkStateStability();
-      }, 10000);
-    },
-    
-    clearStateMonitor() {
-      if (this.stateMonitorInterval) {
-        clearInterval(this.stateMonitorInterval);
-        this.stateMonitorInterval = null;
-      }
-    },
-    
-    resetStateMonitorCounters() {
-      this.stateChangeCounter = 0;
-      this.lastStateChangeTime = Date.now();
-      this.lastTaskStatus = this.currentTask?.status || 'idle';
-    },
-    
-    recordStateChange(newStatus) {
-      if (newStatus !== this.lastTaskStatus) {
-        this.lastTaskStatus = newStatus;
-        this.lastStateChangeTime = Date.now();
-        this.stateChangeCounter = 0;
-      }
-    },
-    
-    checkStateStability() {
-      // 只有在训练过程中才进行状态稳定性检查
-      if (!this.currentTask || !this.currentTask.task_id) {
-        return;
-      }
-      
-      // 如果处于"processing"或"running"状态，检查是否长时间未变化
-      if (
-        (this.currentTask.status === 'processing' || this.currentTask.status === 'running') && 
-        this.isProcessing
-      ) {
-        const now = Date.now();
-        const elapsedSeconds = (now - this.lastStateChangeTime) / 1000;
-        
-        // 增加计数器
-        this.stateChangeCounter++;
-        
-        // 如果状态超过2分钟未变化，且至少检查了10次
-        if (elapsedSeconds > 120 && this.stateChangeCounter >= 10) {
-          console.warn(`训练状态 "${this.currentTask.status}" 已经 ${Math.floor(elapsedSeconds)} 秒未变化，可能卡住了`);
-          
-          // 弹出通知，询问用户是否要重置
-          ElMessageBox.confirm(
-            `训练状态似乎已经${Math.floor(elapsedSeconds)}秒未更新。可能是后端通信问题或训练过程卡住了。`,
-            '训练状态可能卡住',
-            {
-              confirmButtonText: '重置状态',
-              cancelButtonText: '继续等待',
-              type: 'warning'
-            }
-          ).then(() => {
-            // 用户选择重置
-            this.forceReset();
-          }).catch(() => {
-            // 用户选择继续等待，重置计数器
-            this.resetStateMonitorCounters();
-          });
-        }
-        
-        // 如果状态超过5分钟未变化，自动重置
-        if (elapsedSeconds > 300) {
-          console.error(`训练状态 "${this.currentTask.status}" 已经 ${Math.floor(elapsedSeconds)} 秒未变化，自动重置`);
-          ElNotification({
-            title: '状态自动重置',
-            message: `训练状态已超过5分钟未更新，系统已自动重置`,
-            type: 'warning',
-            position: 'top-right',
-            duration: 3000
-          });
-          this.forceReset();
-        }
-      }
-      
-      // 检查isProcessing是否卡住 - 如果没有活动任务但isProcessing为true
-      if (this.isProcessing && (!this.currentTask || !this.currentTask.task_id || 
-          ['completed', 'failed', 'cancelled'].includes(this.currentTask.status))) {
-        console.warn('检测到处理状态不一致：isProcessing=true但没有活动任务');
-        // 重置处理状态
-        this.isProcessing = false;
-      }
-    },
+        store.dispatch('setTrainingTask', taskData);
+        selectedFolder.value = taskData.folder_name;
+        isProcessing.value = true;
+    } else {
+        console.log("Backend reports no active tasks, or task is in a final state. Clearing local state.");
+        store.dispatch('clearTrainingTask');
+        isProcessing.value = false;
+    }
+  } catch (error) {
+    console.error('Failed to sync task state with backend:', error);
+    ElMessage.error('无法同步训练状态，将清除本地状态以避免界面卡死');
+    store.dispatch('clearTrainingTask');
+    isProcessing.value = false;
   }
+};
+
+const getUsername = () => {
+  return username.value;
+};
+
+const fetchFolders = async () => {
+  loadingFolders.value = true;
+  httpError.value = null;
+  try {
+    const usernameValue = getUsername();
+
+    const response = await TrainingService.getPointCloudResults(usernameValue);
+    handlePointCloudResultsResponse(response);
+    return folders.value;
+  } catch (error) {
+    httpError.value = 'Failed to load folders. Please check backend connection.';
+    ElMessage.error(httpError.value);
+    return [];
+  } finally {
+    loadingFolders.value = false;
+  }
+};
+
+const fetchResults = async () => {
+  loadingResults.value = true;
+  const usernameValue = getUsername();
+  if (!usernameValue) {
+    loadingResults.value = false;
+    return;
+  }
+  
+  TrainingService.getTrainingResults(usernameValue)
+    .then(response => {
+      results.value = response.results || [];
+    })
+    .catch(error => {
+      console.error('获取训练结果失败:', error);
+      ElMessage.error('无法加载训练历史记录');
+      results.value = [];
+    })
+    .finally(() => {
+      loadingResults.value = false;
+    });
+};
+
+const selectFolder = (folder) => {
+  selectedFolder.value = folder.folder_name || folder.name;
+  selectedFolderDetails.value = folder;
+};
+
+const parseIterationString = (str) => {
+  return TrainingParams.parseIterations(str);
+};
+
+const resetParams = () => {
+  Object.assign(trainingParams, TrainingParams.getDefaultParams());
+  testIterationsInput.value = "7000 30000";
+  saveIterationsInput.value = "7000 30000";
+  checkpointIterationsInput.value = "";
+  ElNotification({
+    title: '操作成功',
+    message: '所有训练参数已恢复默认设置',
+    type: 'success',
+    position: 'top-right',
+    duration: 2000,
+    showClose: true
+  });
+};
+
+const startTraining = async () => {
+  const folderValidation = TrainingUtils.validateFolderSelection(selectedFolderDetails.value);
+  if (!folderValidation.isValid) {
+    ElNotification({
+      title: '操作失败',
+      message: folderValidation.error,
+      type: 'error',
+      position: 'top-right',
+      duration: 2000,
+      showClose: true
+    });
+    return;
+  }
+
+  isProcessing.value = true;
+  httpError.value = null;
+  
+  // 重置状态监控计数器
+  resetStateMonitorCounters();
+
+  try {
+    const usernameValue = getUsername();
+    const sourcePath = selectedFolderDetails.value.output_folder;
+
+    const paramValidation = TrainingParams.validateParams(trainingParams);
+    if (!paramValidation.isValid) {
+      ElNotification({
+        title: '操作失败',
+        message: '参数验证失败: ' + paramValidation.errors.join(', '),
+        type: 'error',
+        position: 'top-right',
+        duration: 2000,
+        showClose: true
+      });
+      isProcessing.value = false; // 终止处理
+      return;
+    }
+
+    // 格式化参数
+    const cleanParams = TrainingParams.formatParamsForAPI(trainingParams);
+
+    // 添加WebSocket配置到参数中
+    cleanParams.ip = 'localhost';
+    cleanParams.port = 6009;
+    
+    // 构造任务数据
+    const taskData = {
+      username: usernameValue,
+      source_path: sourcePath,
+      websocket_port: 6009, 
+      websocket_host: 'localhost', 
+      params: cleanParams
+    };
+
+    const response = await TrainingService.startTraining(taskData);
+    handleStartTrainingResponse(response);
+  } catch (error) {
+    httpError.value = `Failed to start training: ${error.message}`;
+    ElNotification({
+      title: '操作失败',
+      message: httpError.value,
+      type: 'error',
+      position: 'top-right',
+      duration: 2000,
+      showClose: true
+    });
+    store.dispatch('setTrainingTask', { status: 'failed', message: httpError.value, error: httpError.value });
+  } finally {
+    isProcessing.value = false;
+  }
+};
+
+const handleStartTrainingResponse = (data) => {
+  if (data && data.task_id) {
+
+    const taskData = {
+      task_id: data.task_id,
+      status: data.status || 'running', 
+      progress: 0,
+      message: data.message || 'Training started...',
+      output_logs: [],
+      start_time: new Date().toISOString(),
+      folder_name: selectedFolder.value,
+      model_path: data.model_path,
+      visualization_url: data.visualization ? `http://${data.visualization.host}:${data.visualization.port}` : null,
+      websocket: data.websocket || { 
+        host: 'localhost',
+        port: 6009
+      }
+    };
+    store.dispatch('setTrainingTask', taskData);
+    ElNotification({
+      title: '操作成功',
+      message: '训练任务已成功启动',
+      type: 'success',
+      position: 'bottom-right',
+      customClass: 'custom-notification',
+      duration: 3000
+    });
+  } else {
+    ElMessage.error('训练失败: 服务器响应无效。');
+    store.dispatch('setTrainingTask', { status: 'failed', message: 'Invalid server response on start.' });
+  }
+};
+
+const startTaskStatusPolling = (taskId) => {
+  // 如果WebSocket已连接，则注册任务监听
+  if (wsClient.isConnected()) {
+    wsClient.emit('register_task_updates', {
+      username: getUsername(),
+      task_id: taskId
+    });
+  } else {
+    // 如果WebSocket未连接，回退到HTTP轮询实现
+    fallbackToHttpPolling(taskId);
+  }
+};
+
+const fallbackToHttpPolling = (taskId) => {
+  if (taskCheckInterval.value) {
+    clearInterval(taskCheckInterval.value);
+  }
+  
+  taskCheckInterval.value = setInterval(async () => {
+    try {
+      const response = await TrainingService.getTrainingStatus(getUsername(), taskId);
+      handleTrainingStatusUpdate(response);
+    } catch (error) {
+      console.error('轮询任务状态时发生错误:', error);
+      if (error.status === 404) {
+        ElMessage.error('服务器上找不到任务。停止更新。');
+        clearTaskCheckInterval();
+        store.dispatch('setTrainingTask', { ...currentTask.value, status: 'failed', message: '服务器上找不到任务。' });
+      }
+    }
+  }, 3000); // 每3秒轮询一次
+};
+
+// 修改clearTaskCheckInterval方法
+const clearTaskCheckInterval = () => {
+  if (taskCheckInterval.value) {
+    clearInterval(taskCheckInterval.value);
+    taskCheckInterval.value = null;
+  }
+  
+  // 如果WebSocket已连接，则取消任务更新
+  if (wsClient.isConnected() && currentTask.value && currentTask.value.task_id) {
+    wsClient.emit('unregister_task_updates', {
+      username: getUsername(),
+      task_id: currentTask.value.task_id
+    });
+  }
+};
+
+const checkActiveTask = async () => {
+  // This method will check if there's an active task for the user when the component mounts.
+  try {
+    const usernameValue = getUsername();
+    const response = await TrainingService.checkActiveTask(usernameValue);
+    
+    if (response && response.active_tasks && response.active_tasks.length > 0) {
+      const activeTask = response.active_tasks[0]; // Assuming one active task per user for now    
+      
+      selectedFolder.value = activeTask.folder_name || (activeTask.source_path ? activeTask.source_path.split('/').pop() : 'Unknown');
+
+      const taskData = {
+        task_id: activeTask.task_id,
+        status: activeTask.status,
+        progress: activeTask.progress || 0,
+        message: activeTask.message || 'Restored active task...',
+        output_logs: activeTask.output_logs || [],
+        start_time: activeTask.start_time,
+        folder_name: selectedFolder.value,
+        // model_path might not be available in active_tasks, depends on backend
+      };
+      store.dispatch('setTrainingTask', taskData);
+      // Polling will be started by the watcher
+    } else {
+      console.log('No active training tasks found for user on mount.');
+       // Ensure any lingering task in Vuex is cleared if backend says no active tasks
+      if (currentTask.value && currentTask.value.task_id && (currentTask.value.status === 'running' || currentTask.value.status === 'processing')) {
+        store.dispatch('clearTrainingTask');
+    }
+    }
+  } catch (error) {
+    console.error('Error checking for active tasks:', error.response ? error.response.data : error.message);
+    ElMessage.error('Failed to check for active tasks.');
+  }
+};
+
+const cancelTask = async () => {
+  if (!currentTask.value || !currentTask.value.task_id) {
+    ElMessage.warn('No active task to cancel.');
+    return;
+  }
+
+  isProcessing.value = true; // Indicate processing start
+
+  try {
+    const usernameValue = getUsername();
+    const taskId = currentTask.value.task_id;
+  
+    // Immediately stop local polling to prevent race conditions
+    clearTaskCheckInterval();
+    
+    const response = await TrainingService.cancelTraining(usernameValue, taskId);
+    handleCancelTaskResponse(response);
+
+  } catch (error) {
+    console.error('Error cancelling task:', error.response ? error.response.data : error.message);
+    httpError.value = `Failed to cancel task: ${error.response?.data?.error || error.message}`;
+    ElMessage.error(httpError.value);
+    // Even if API call fails, update local state to reflect cancellation attempt
+    const currentTaskState = store.getters.trainingCurrentTask;
+    store.dispatch('setTrainingTask', { ...currentTaskState, status: 'failed', message: 'Cancellation failed.', error: httpError.value });
+  } finally {
+    isProcessing.value = false; // Indicate processing end
+  }
+};
+
+const handleCancelTaskResponse = (data) => {
+  ElNotification({
+    title: '任务取消',
+    message: data.message || '任务取消请求已成功发送',
+    type: 'info',
+    position: 'top-right',
+    duration: 3000,
+    showClose: true,
+    customClass: 'custom-notification'
+  });
+  
+  // Update task state in Vuex to 'cancelled'
+  // The backend should eventually confirm this state via polling if cancellation is async
+  // Or, if backend confirms immediately, this is fine.
+  const currentTaskState = store.getters.trainingCurrentTask;
+  store.dispatch('setTrainingTask', { 
+    ...currentTaskState, 
+    status: 'cancelled', 
+    message: data.message || 'Task cancelled by user.',
+    end_time: new Date().toISOString()
+  });
+
+  isProcessing.value = false; // Reset processing flag
+  clearTaskCheckInterval(); // Ensure polling stops
+  
+  // Delay reset to allow user to see status, then refresh results
+  setTimeout(() => {
+    resetTaskState(); 
+    fetchResults();
+    fetchFolders(); // Refresh folders as well
+  }, 1500);
+};
+
+const resetTaskState = () => {
+  store.dispatch('clearTrainingTask'); // Clears the task from Vuex
+  selectedFolder.value = null;
+  selectedFolderDetails.value = null;
+  isProcessing.value = false;
+  httpError.value = null;
+  clearTaskCheckInterval(); // Ensure polling stops
+  ElMessage.info('准备开始新的训练任务。');
+};
+
+const checkAndCleanInvalidState = () => {
+  const task = store.getters.trainingCurrentTask;
+  
+  // 状态一致性检查 - 如果没有任务但isProcessing为true，重置它
+  if ((!task || !task.task_id) && isProcessing.value) {
+    console.warn('检测到无效状态：isProcessing=true但没有训练任务');
+    isProcessing.value = false;
+  }
+  
+  if (task && task.task_id && (task.status === 'running' || task.status === 'processing')) {
+    // 这里应该显示任务ID
+    verifyTaskStatusWithBackend(task.task_id);
+  } else if (task && (task.status === 'cancelled' || task.status === 'failed' || task.status === 'completed')) {
+    resetTaskState();
+  }
+};
+
+const verifyTaskStatusWithBackend = async (taskId) => {
+  try {
+    const usernameValue = getUsername();
+    const backendTaskStatus = await TrainingService.getTrainingStatus(usernameValue, taskId);
+
+    if (backendTaskStatus && (backendTaskStatus.status === 'running' || backendTaskStatus.status === 'processing')) {
+      store.dispatch('setTrainingTask', { ...currentTask.value, ...backendTaskStatus });
+      // Polling will be started/managed by the watcher
+    } else {
+      console.log(`Task ${taskId} is not active on backend (status: ${backendTaskStatus?.status}). Clearing from store.`);
+      store.dispatch('clearTrainingTask');
+    }
+  } catch (error) {
+    console.error(`Error verifying task ${taskId} with backend:`, error.response ? error.response.data : error.message);
+    if (error.response && error.response.status === 404) {
+       console.log(`Task ${taskId} not found on backend. Clearing from store.`);
+       store.dispatch('clearTrainingTask');
+    }
+  }
+};
+
+const forceReset = () => {
+  clearTaskCheckInterval();
+  resetTaskState(); // This now clears Vuex and resets local component state
+  ElNotification({
+      title: '操作成功',
+      message: '所有训练状态已重置',
+      type: 'success',
+      position: 'top-right',
+      customClass: 'custom-notification',
+      duration: 2000
+    });
+  fetchFolders(); // Refresh folder list
+  fetchResults(); // Refresh history
+};
+
+const handlePointCloudProcessed = (processedData) => {
+  fetchFolders().then(() => {
+    const folder = folders.value.find(f => f.output_folder === processedData.output_folder);
+    if (folder) {
+      selectFolder(folder);
+      ElNotification({
+        title: '操作成功',
+        message: `自动选择新处理的文件夹: ${folder.folder_name || folder.name}`,
+        type: 'success',
+        position: 'top-right',
+        duration: 2000,
+        showClose: true
+      });
+    }
+  });
+};
+
+const formatDate = (timestamp) => {
+  if (!timestamp) return 'Unknown';
+  const date = new Date( (typeof timestamp === 'number' && timestamp < 10000000000) ? timestamp * 1000 : timestamp);
+  return date.toLocaleString();
+};
+
+const formatTime = (seconds) => {
+  if (seconds === null || seconds === undefined || isNaN(seconds)) return 'N/A';
+  const h = Math.floor(seconds / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
+  const s = Math.floor(seconds % 60);
+  return [
+    h > 0 ? `${h}h` : '',
+    m > 0 ? `${m}m` : '',
+    s > 0 ? `${s}s` : ''
+  ].filter(Boolean).join(' ') || '0s';
+};
+
+const handlePointCloudResultsResponse = (responseData) => {
+  const data = responseData.data || responseData;
+  if (data && data.results && Array.isArray(data.results)) {
+    folders.value = data.results || [];
+    if (folders.value.length === 0) {
+      console.warn('No completed point cloud folders found from API.');
+    }
+  } else {
+    console.error('Invalid point cloud results structure:', data);
+    folders.value = [];
+    ElMessage.error('Failed to parse point cloud folder list.');
+  }
+};
+
+const confirmDeleteResult = async (result) => {
+  try {
+    await ElMessageBox.confirm(
+      `您确定要永久删除训练结果文件夹 "${result.folder_name}" 及其所有内容吗？此操作不可逆。`,
+      '警告',
+      {
+        confirmButtonText: '确定删除',
+        cancelButtonText: '取消',
+        type: 'warning',
+      }
+    );
+    deleteResult(result);
+  } catch (e) {
+    ElMessage.info('删除操作已取消');
+  }
+};
+
+const deleteResult = async (result) => {
+  try {
+    const folderName = result.folder_name;
+
+    // 检查WebSocket连接
+    if (!wsClient.isConnected()) {
+      ElNotification({
+        title: '操作失败',
+        message: 'WebSocket未连接，请刷新页面重试',
+        type: 'error',
+        position: 'top-right',
+        duration: 2000
+      });
+      return;
+    }
+
+    // 显示加载中状态
+    ElMessage.info('正在删除文件夹，请稍候...');
+
+    const response = await wsClient.emitWithAck('delete_training_result', {
+      token: localStorage.getItem('token'),
+      folder_name: folderName,
+      folderType: 'models'
+    }, 30000);
+    console.log('删除文件夹响应:', response);
+    if (response && response.status === 'success') {
+      ElNotification({
+        title: '操作成功',
+        message: response.message || '删除请求已成功发送',
+        type: 'success',
+        position: 'top-right',
+        duration: 2000,
+        showClose: true
+      });
+      
+      // 刷新列表
+      fetchResults();
+    } else {
+      console.error('删除失败:', response);
+      ElNotification({
+        title: '操作失败',
+        message: response.message || '删除失败',
+        type: 'error',
+        position: 'top-right',
+        duration: 2000,
+        showClose: true
+      });
+    }
+  } catch (error) {
+    console.error('删除请求异常:', error);
+    ElNotification({
+      title: '操作失败',
+      message: error.message || '删除请求失败或超时',
+      type: 'error',
+      position: 'top-right',
+      duration: 2000,
+      showClose: true
+    });
+  }
+};
+
+const fetchPointCloudFolders = async () => {
+  try {
+    const usernameValue = store.getters.user?.username;
+    if (!usernameValue) {
+      return;
+    }
+    const response = await TrainingService.getPointCloudResults(usernameValue);
+    if (response && Array.isArray(response.results)) {
+      // Note: pointCloudFolders is not defined in the reactive data, might need to add it
+      // pointCloudFolders.value = response.results;
+    } else {
+      // pointCloudFolders.value = [];
+    }
+  } catch (err) {
+    // pointCloudFolders.value = [];
+    ElNotification({
+      title: '操作失败',
+      message: '无法加载已处理的点云文件夹列表。',
+      type: 'error',
+      position: 'top-right',
+      duration: 2000,
+      showClose: true
+    });
+  }
+};
+
+const handleFoldersUpdated = (data) => {
+  const currentUser = store.getters.user?.username;
+  if (data.username === currentUser) {
+    fetchTrainingResults();
+    fetchPointCloudFolders();
+  }
+};
+
+const fetchTrainingResults = () => {
+  loadingResults.value = true;
+  const usernameValue = getUsername();
+  if (!usernameValue) {
+    loadingResults.value = false;
+    return;
+  }
+  
+  TrainingService.getTrainingResults(usernameValue)
+    .then(response => {
+      results.value = response.results || [];
+    })
+    .catch(error => {
+      console.error('获取训练结果失败:', error);
+      ElMessage.error('无法加载训练历史记录');
+      results.value = [];
+    })
+    .finally(() => {
+      loadingResults.value = false;
+    });
+};
+
+const updateTaskStatus = (updatedTask) => {
+    // Note: trainingResults is not defined in the reactive data, might need to add it
+    // const index = trainingResults.value.findIndex(t => t.task_id === updatedTask.task_id);
+    // if (index !== -1) {
+    //     // 使用Vue的响应式方式更新数组元素
+    //     trainingResults.value.splice(index, 1, { ...trainingResults.value[index], ...updatedTask });
+    // } else {
+    //     // 如果任务不在列表中，可能是新任务，则添加到列表
+    //     trainingResults.value.unshift(updatedTask);
+    // }
+};
+
+const handleTrainingStatusUpdate = (data) => {
+  if (!data) return;
+  
+  // 记录状态变化
+  recordStateChange(data.status);
+    
+  // 更新Vuex存储中的任务状态
+  const updatedTaskData = {
+    ...currentTask.value,
+    ...data
+  };
+  store.dispatch('setTrainingTask', updatedTaskData);
+  if (['completed', 'failed', 'cancelled'].includes(data.status)) {
+    clearTaskCheckInterval();
+    isProcessing.value = false;
+    const finalTask = {
+      ...currentTask.value,
+      ...data,
+      end_time: data.end_time || new Date().toISOString()
+    };
+    store.dispatch('setTrainingTask', finalTask);
+    if (data.status === 'cancelled') {
+      setTimeout(() => resetTaskState(), 1500);
+    }
+    fetchResults();
+  }
+};
+
+// 添加状态监控相关方法
+const startStateMonitor = () => {
+  // 清除任何现有的监控器
+  clearStateMonitor();
+  
+  // 设置初始状态
+  lastTaskStatus.value = currentTask.value?.status || 'idle';
+  lastStateChangeTime.value = Date.now();
+  stateChangeCounter.value = 0;
+  
+  // 创建新的监控器 - 每10秒检查一次状态
+  stateMonitorInterval.value = setInterval(() => {
+    checkStateStability();
+  }, 10000);
+};
+
+const clearStateMonitor = () => {
+  if (stateMonitorInterval.value) {
+    clearInterval(stateMonitorInterval.value);
+    stateMonitorInterval.value = null;
+  }
+};
+
+const resetStateMonitorCounters = () => {
+  stateChangeCounter.value = 0;
+  lastStateChangeTime.value = Date.now();
+  lastTaskStatus.value = currentTask.value?.status || 'idle';
+};
+
+const recordStateChange = (newStatus) => {
+  if (newStatus !== lastTaskStatus.value) {
+    lastTaskStatus.value = newStatus;
+    lastStateChangeTime.value = Date.now();
+    stateChangeCounter.value = 0;
+  }
+};
+
+const checkStateStability = () => {
+  // 只有在训练过程中才进行状态稳定性检查
+  if (!currentTask.value || !currentTask.value.task_id) {
+    return;
+  }
+  
+  // 如果处于"processing"或"running"状态，检查是否长时间未变化
+  if (
+    (currentTask.value.status === 'processing' || currentTask.value.status === 'running') && 
+    isProcessing.value
+  ) {
+    const now = Date.now();
+    const elapsedSeconds = (now - lastStateChangeTime.value) / 1000;
+    
+    // 增加计数器
+    stateChangeCounter.value++;
+    
+    // 如果状态超过2分钟未变化，且至少检查了10次
+    if (elapsedSeconds > 120 && stateChangeCounter.value >= 10) {
+      console.warn(`训练状态 "${currentTask.value.status}" 已经 ${Math.floor(elapsedSeconds)} 秒未变化，可能卡住了`);
+      
+      // 弹出通知，询问用户是否要重置
+      ElMessageBox.confirm(
+        `训练状态似乎已经${Math.floor(elapsedSeconds)}秒未更新。可能是后端通信问题或训练过程卡住了。`,
+        '训练状态可能卡住',
+        {
+          confirmButtonText: '重置状态',
+          cancelButtonText: '继续等待',
+          type: 'warning'
+        }
+      ).then(() => {
+        // 用户选择重置
+        forceReset();
+      }).catch(() => {
+        // 用户选择继续等待，重置计数器
+        resetStateMonitorCounters();
+      });
+    }
+    
+    // 如果状态超过5分钟未变化，自动重置
+    if (elapsedSeconds > 300) {
+      console.error(`训练状态 "${currentTask.value.status}" 已经 ${Math.floor(elapsedSeconds)} 秒未变化，自动重置`);
+      ElNotification({
+        title: '状态自动重置',
+        message: `训练状态已超过5分钟未更新，系统已自动重置`,
+        type: 'warning',
+        position: 'top-right',
+        duration: 3000
+      });
+      forceReset();
+    }
+  }
+  
+  // 检查isProcessing是否卡住 - 如果没有活动任务但isProcessing为true
+  if (isProcessing.value && (!currentTask.value || !currentTask.value.task_id || 
+      ['completed', 'failed', 'cancelled'].includes(currentTask.value.status))) {
+    console.warn('检测到处理状态不一致：isProcessing=true但没有活动任务');
+    // 重置处理状态
+    isProcessing.value = false;
+  }
+};
+
+const viewResults = () => {
+  // 实现查看结果的逻辑
+  if (currentTask.value && currentTask.value.model_path) {
+    router.push(`/results/${currentTask.value.folder_name}`);
+  }
+};
+
+// 返回所有响应式变量和函数供模板使用
+return {
+  // 响应式数据
+  loadingFolders,
+  loadingResults,
+  folders,
+  results,
+  selectedFolder,
+  selectedFolderDetails,
+  isProcessing,
+  httpError,
+  testIterationsInput,
+  saveIterationsInput,
+  checkpointIterationsInput,
+  trainingParams,
+  
+  // 计算属性
+  username,
+  currentTask,
+  parsedTestIterations,
+  parsedSaveIterations,
+  parsedCheckpointIterations,
+  
+  // 方法函数
+  selectFolder,
+  resetParams,
+  startTraining,
+  cancelTask,
+  resetTaskState,
+  forceReset,
+  formatDate,
+  formatTime,
+  confirmDeleteResult,
+  deleteResult,
+  viewResults,
+  
+  // 图标
+  ...icons
 };
 </script>
 
-<style src="../assets/styles/trainingComponent.css" scoped>
+<style scoped>
+.parameter-section {
+  margin-bottom: 24px;
+}
 
+.parameter-row {
+  margin-bottom: 16px;
+}
+
+.parameter-description {
+  font-size: 12px;
+  color: #909399;
+  margin-top: 4px;
+}
+
+.range-value {
+  min-width: 60px;
+  text-align: center;
+  font-weight: 500;
+}
+
+.control-btn {
+  margin-right: 12px;
+  margin-bottom: 8px;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.training-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.folder-item {
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.folder-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.folder-item.selected {
+  border-color: #409eff;
+  box-shadow: 0 0 0 2px rgba(64, 158, 255, 0.2);
+}
+
+.folder-icon {
+  font-size: 24px;
+  color: #409eff;
+  margin-bottom: 8px;
+}
+
+.folder-name {
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+
+.folder-info {
+  font-size: 12px;
+  color: #909399;
+}
 </style>

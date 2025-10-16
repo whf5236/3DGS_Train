@@ -1,5 +1,5 @@
-import { ref, computed, onMounted, watch } from 'vue'
-import { useFileStore, FILE_CATEGORIES, type FileSystemItem, type FolderItem } from '@/stores/fileStore'
+import { ref,  watch } from 'vue'
+import { useFileStore, type FileSystemItem, type FolderItem } from '@/stores/fileStore'
 import { useUserStore } from '@/stores/userStore'
 
 // 定义 Props 接口
@@ -101,36 +101,45 @@ export function useFileListComponent(
     }
   }
 
-  // 根据文件扩展名获取文件分类
-  const getFileCategory = (fileName: string): keyof typeof FILE_CATEGORIES => {
-    const extension = fileName.split('.').pop()?.toLowerCase() || ''
-    
-    for (const [category, config] of Object.entries(FILE_CATEGORIES)) {
-      if (config.extensions.includes(extension)) {
-        return category as keyof typeof FILE_CATEGORIES
-      }
-    }
-    
-    return 'other'
-  }
-
-  const getFileTagType = (file: any) => {
-    // 如果文件对象没有 category 属性，根据文件名推断
-    const category = file.category || getFileCategory(file.name)
-    
-    switch (category) {
+  // 根据当前阶段获取文件夹类型标签
+  const getFolderStageTagType = (stage: string) => {
+    switch (stage) {
       case 'image': return 'success'
-      case 'video': return 'warning'
-      case 'document': return 'primary'
-      case 'pointcloud': return 'info'
+      case 'colmap': return 'warning' 
+      case 'pcd': return 'info'
       default: return 'info'
     }
   }
 
-  const getFileCategoryLabel = (file: any) => {
-    // 如果文件对象没有 category 属性，根据文件名推断
-    const category = file.category || getFileCategory(file.name)
-    return FILE_CATEGORIES[category as keyof typeof FILE_CATEGORIES]?.name || '其他'
+  // 根据当前阶段获取文件夹类型标签文本
+  const getFolderStageLabel = (stage: string) => {
+    switch (stage) {
+      case 'image': return '图片阶段'
+      case 'colmap': return 'COLMAP阶段'
+      case 'pcd': return '点云阶段'
+      default: return '未知阶段'
+    }
+  }
+
+  // 简化的文件标签类型（主要用于文件夹）
+  const getFileTagType = (item: any) => {
+    if (item.item_type === 'folder') {
+      // 文件夹根据当前阶段确定类型
+      return getFolderStageTagType(fileStore.currentStage)
+    } else {
+      // 文件统一显示为 info 类型
+      return 'info'
+    }
+  }
+
+  // 简化的文件分类标签
+  const getFileCategoryLabel = (item: any) => {
+    if (item.item_type === 'folder') {
+      // 文件夹显示当前阶段
+      return getFolderStageLabel(fileStore.currentStage)
+    } else {
+      return '文件'
+    }
   }
 
   const formatFileSize = (bytes: number): string => {
@@ -141,15 +150,12 @@ export function useFileListComponent(
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
   }
 
-  // 修复时间格式化函数 - 处理 Unix 时间戳或 ISO 字符串
   const formatDate = (timestamp: number | string): string => {
     let date: Date
     
     if (typeof timestamp === 'string') {
-      // 如果是 ISO 字符串
       date = new Date(timestamp)
     } else {
-      // 如果是 Unix 时间戳（秒）
       date = new Date(timestamp * 1000)
     }
     
@@ -204,7 +210,8 @@ export function useFileListComponent(
     formatDate,
     initializeComponent,
     
-    // 新增的辅助方法
-    getFileCategory
+    // 阶段相关的辅助方法
+    getFolderStageTagType,
+    getFolderStageLabel
   }
 }

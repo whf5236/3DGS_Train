@@ -579,7 +579,7 @@ const submitUpload = async () => {
 const uploadFolder = async () => {
   const form = new FormData()
   form.append('username', username.value)
-  form.append('upload_component', 'folder')
+  form.append('stage', 'image')
   
   if (folderName.value && folderName.value.trim()) {
     form.append('custom_folder_name', folderName.value.trim())
@@ -595,7 +595,7 @@ const uploadFolder = async () => {
     }
   }
   
-  const res = await api.post('/upload_images', form, {
+  const res = await api.post('/upload/upload_images', form, {
     headers: { 'Content-Type': 'multipart/form-data' },
     onUploadProgress: (progressEvent) => {
       if (progressEvent.total) {
@@ -607,9 +607,9 @@ const uploadFolder = async () => {
   uploadProgress.status = 'success'
   uploadProgress.percentage = 100
   uploadProgress.completed = fileList.value.length
-  uploadProgress.targetFolder = res.data.folder_structure.full_path
+  uploadProgress.targetFolder = res.data.folder_info.target_path
   
-  ElMessage.success(`文件夹上传成功：保存至 ${res.data.folder_structure.folder_name}`)
+  ElMessage.success(`文件夹上传成功：保存至 ${res.data.folder_info.folder_name}`)
   clearFiles()
 }
 
@@ -621,7 +621,7 @@ const uploadArchive = async () => {
   
   const form = new FormData()
   form.append('username', username.value)
-  form.append('upload_component', 'archive')
+  form.append('stage', 'image')
   
   if (folderName.value && folderName.value.trim()) {
     form.append('custom_folder_name', folderName.value.trim())
@@ -638,7 +638,7 @@ const uploadArchive = async () => {
     }
   }
   
-  const res = await api.post('/upload_images', form, {
+  const res = await api.post('/upload/upload_images', form, {
     headers: { 'Content-Type': 'multipart/form-data' },
     onUploadProgress: (progressEvent) => {
       if (progressEvent.total) {
@@ -650,9 +650,9 @@ const uploadArchive = async () => {
   uploadProgress.status = 'success'
   uploadProgress.percentage = 100
   uploadProgress.completed = extractedFiles.value.length
-  uploadProgress.targetFolder = res.data.folder_structure.full_path
+  uploadProgress.targetFolder = res.data.folder_info.target_path
   
-  ElMessage.success(`压缩包解压上传成功：保存至 ${res.data.folder_structure.folder_name}`)
+  ElMessage.success(`压缩包解压上传成功：保存至 ${res.data.folder_info.folder_name}`)
   clearFiles()
 }
 </script>

@@ -1,24 +1,25 @@
 <template>
   <div class="point-cloud-processor">
-    <div class="processor-layout">
+    <el-row :gutter="20" class="processor-layout">
       <!-- 左侧：文件夹选择 -->
-      <div class="glass-card layout-left">
-        <div class="card-header">
-          <h6><el-icon><Folder /></el-icon> 图片文件夹</h6>
-        </div>
-        <div class="card-body">
-          <div v-if="loading" class="text-center py-5">
-            <div class="spinner-border text-primary" role="status">
-              <span class="visually-hidden">加载中...</span>
+      <el-col :span="12">
+        <el-card class="glass-card">
+          <template #header>
+            <div class="card-header">
+              <h6><el-icon><Folder /></el-icon> 图片文件夹</h6>
             </div>
-            <p class="mt-3">加载文件夹...</p>
+          </template>
+          
+          <div v-if="loading" v-loading="loading" class="text-center" style="padding: 40px 0; min-height: 120px;">
+            <p>加载文件夹...</p>
           </div>
 
-          <div v-else-if="folders.length === 0" class="text-center py-5">
-            <i class="fas fa-folder-open fa-4x text-muted mb-3"></i>
-            <p class="text-muted">未找到图片文件夹</p>
-            <p class="text-muted small">请先在文件上传页面上传图片</p>
-          </div>
+          <el-empty v-else-if="folders.length === 0" description="未找到图片文件夹">
+            <template #image>
+              <el-icon size="60"><FolderOpened /></el-icon>
+            </template>
+            <p style="color: #909399; font-size: 14px;">请先在文件上传页面上传图片</p>
+          </el-empty>
 
           <div v-else class="folder-list">
             <div v-for="folder in folders" :key="folder.name" class="folder-item"
@@ -30,212 +31,224 @@
                 <div class="folder-name">{{ folder.name }}</div>
               </div>
               <div class="folder-action">
-                <button class="btn btn-sm btn-primary" @click.stop="processFolder(folder)"
-                  :disabled="isProcessing || processingFolder === folder.name">
-                  <i class="fas" :class="processingFolder === folder.name ? 'fa-spinner fa-spin' : 'fa-play'"></i>
-                </button>
+                <el-button 
+                  size="small" 
+                  type="primary" 
+                  @click.stop="processFolder(folder)"
+                  :disabled="isProcessing || processingFolder === folder.name"
+                  :loading="processingFolder === folder.name">
+                  <el-icon v-if="!processingFolder || processingFolder !== folder.name"><VideoPlay /></el-icon>
+                </el-button>
               </div>
             </div>
           </div>
-        </div>
-      </div>
+        </el-card>
+      </el-col>
 
       <!-- 右侧：处理状态和结果 -->
-      <div class="glass-card layout-right">
-        <div class="card-header">
-          <h6><el-icon><Connection /></el-icon> 点云处理</h6>
-        </div>
-        <div class="card-body">
-          <div v-if="!selectedFolder && !currentTask" class="text-center py-5">
-            <i class="fas fa-cube fa-4x text-muted mb-3"></i>
-            <p class="text-muted">选择文件夹进行处理</p>
-            <p class="text-muted small">处理时间取决于图片数量，可能需要几分钟</p>
-          </div>
+      <el-col :span="12">
+        <el-card class="glass-card">
+          <template #header>
+            <div class="card-header">
+              <h6><el-icon><Connection /></el-icon> 点云处理</h6>
+            </div>
+          </template>
+          
+          <el-empty v-if="!selectedFolder && !currentTask" description="选择文件夹进行处理">
+            <template #image>
+              <el-icon size="60"><Box /></el-icon>
+            </template>
+            <p style="color: #909399; font-size: 14px;">处理时间取决于图片数量，可能需要几分钟</p>
+          </el-empty>
 
           <div v-else-if="currentTask" class="processing-status">
-            <h5 class="mb-4">
+            <h5 style="margin-bottom: 20px;">
               Processing: {{ processingFolder }}
-              <span class="badge bg-primary ms-2">{{ currentTask.status }}</span>
+              <el-tag :type="getTaskTagType(currentTask.status)" style="margin-left: 8px;">
+                {{ currentTask.status }}
+              </el-tag>
             </h5>
 
-            <div class="progress mb-4" style="height: 25px;">
-              <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar"
-                :style="{ width: `${currentTask.progress}%` }" :class="{
-                  'bg-success': currentTask.status === 'completed',
-                  'bg-danger': currentTask.status === 'failed',
-                  'bg-warning': currentTask.status === 'cancelled'
-                }">
-                {{ currentTask.progress }}%
-              </div>
+            <el-progress 
+              :percentage="currentTask.progress" 
+              :status="getProgressStatus(currentTask.status)"
+              :stroke-width="20"
+              text-inside
+              style="margin-bottom: 20px;" />
+
+            <el-alert 
+              :title="currentTask.message"
+              :type="getAlertType(currentTask.status)"
+              :closable="false"
+              show-icon
+              style="margin-bottom: 16px;" />
+
+            <div v-if="currentTask.status === 'processing'">
+              <el-button type="danger" @click="cancelTask">
+                <el-icon><Close /></el-icon>
+                取消处理
+              </el-button>
             </div>
 
-            <div class="alert" :class="{
-              'alert-info': currentTask.status === 'processing',
-              'alert-success': currentTask.status === 'completed',
-              'alert-danger': currentTask.status === 'failed',
-              'alert-warning': currentTask.status === 'cancelled'
-            }">
-              <i class="fas" :class="{
-                'fa-info-circle': currentTask.status === 'processing',
-                'fa-check-circle': currentTask.status === 'completed',
-                'fa-exclamation-circle': currentTask.status === 'failed',
-                'fa-ban': currentTask.status === 'cancelled'
-              }"></i>
-              {{ currentTask.message }}
-            </div>
-
-            <div v-if="currentTask.status === 'processing'" class="mt-3">
-              <button class="btn btn-danger" @click="cancelTask">
-                <i class="fas fa-stop me-2"></i> 取消处理
-              </button>
-            </div>
-
-            <div v-if="currentTask.status === 'completed'" class="mt-4">
-              <h6 class="mb-3">处理结果</h6>
+            <div v-if="currentTask.status === 'completed'" style="margin-top: 20px;">
+              <h6 style="margin-bottom: 16px;">处理结果</h6>
               <div class="result-info">
                 <p><strong>处理时间:</strong> {{ formatTime(currentTask.processing_time) }}</p>
                 <p><strong>输出文件夹:</strong> {{ currentTask.output_folder }}</p>
               </div>
-              <div class="mt-3">
-                <button class="btn btn-success me-2" @click="viewResults">
-                  <i class="fas fa-eye me-2"></i> 查看结果
-                </button>
-                <button class="btn btn-primary" @click="resetTask">
-                  <i class="fas fa-redo me-2"></i> 处理另一个文件夹
-                </button>
+              <div style="margin-top: 16px;">
+                <el-button type="success" @click="viewResults">
+                  <el-icon><View /></el-icon>
+                  查看结果
+                </el-button>
+                <el-button type="primary" @click="resetTask">
+                  <el-icon><Refresh /></el-icon>
+                  处理另一个文件夹
+                </el-button>
               </div>
             </div>
 
-            <div v-if="currentTask.status === 'failed'" class="mt-4">
-              <button class="btn btn-primary" @click="resetTask">
-                <i class="fas fa-redo me-2"></i> 重试
-              </button>
+            <div v-if="currentTask.status === 'failed'" style="margin-top: 20px;">
+              <el-button type="primary" @click="resetTask">
+                <el-icon><Refresh /></el-icon>
+                重试
+              </el-button>
             </div>
           </div>
 
           <div v-else-if="selectedFolder" class="folder-details-view">
-            <h5 class="mb-4">{{ selectedFolder }}</h5>
+            <h5 style="margin-bottom: 20px;">{{ selectedFolder }}</h5>
 
-            <div class="folder-summary mb-4">
-              <div class="row">
-                <div class="col-md-6">
-                  <div class="info-card">
+            <el-row :gutter="16" style="margin-bottom: 20px;">
+              <el-col :span="12">
+                <el-card class="info-card" shadow="hover">
+                  <div class="info-content">
                     <div class="info-icon">
-                      <i class="fas fa-images"></i>
+                      <el-icon size="24" color="#409EFF"><Picture /></el-icon>
                     </div>
-                    <div class="info-content">
+                    <div>
                       <div class="info-label">图片数量</div>
                       <div class="info-value">{{ selectedFolderDetails?.image_count || 0 }}</div>
                     </div>
                   </div>
-                </div>
-                <div class="col-md-6">
-                  <div class="info-card">
+                </el-card>
+              </el-col>
+              <el-col :span="12">
+                <el-card class="info-card" shadow="hover">
+                  <div class="info-content">
                     <div class="info-icon">
-                      <i class="fas fa-calendar-alt"></i>
+                      <el-icon size="24" color="#67C23A"><Calendar /></el-icon>
                     </div>
-                    <div class="info-content">
+                    <div>
                       <div class="info-label">创建时间</div>
                       <div class="info-value">{{ formatDate(selectedFolderDetails?.created_time) }}</div>
                     </div>
                   </div>
-                </div>
-              </div>
-            </div>
+                </el-card>
+              </el-col>
+            </el-row>
 
-            <div class="processing-options">
-              <h6 class="section-title"><el-icon><Setting /></el-icon> 处理选项</h6>
-              <div class="row">
-                <div class="col-12">
-                  <div class="form-check">
-                <input class="form-check-input" type="checkbox" :checked="processingOptions.resize" @change="updateProcessingOptions" id="resizeOption">
-                <label class="form-check-label" for="resizeOption">
-                  生成缩放后的图片（推荐）
-                </label>
-                  </div>
-                </div>
-              </div>
+            <div class="processing-options" style="margin-bottom: 20px;">
+              <h6 class="section-title">
+                <el-icon><Setting /></el-icon> 处理选项
+              </h6>
+              <el-checkbox 
+                v-model="processingOptions.resize" 
+                @change="updateProcessingOptionsValue">
+                生成缩放后的图片（推荐）
+              </el-checkbox>
             </div>
 
             <div class="processing-actions">
-              <div class="row">
-                <div class="col-md-6">
-                  <button class="btn btn-primary btn-lg w-100" @click="processSelectedFolder" :disabled="isProcessing">
-                    <el-icon v-if="isProcessing"><Loading /></el-icon>
-                    <el-icon v-else><VideoPlay /></el-icon>
+              <el-row :gutter="16">
+                <el-col :span="12">
+                  <el-button 
+                    type="primary" 
+                    size="large" 
+                    style="width: 100%;" 
+                    @click="processSelectedFolder" 
+                    :disabled="isProcessing"
+                    :loading="isProcessing">
+                    <el-icon v-if="!isProcessing"><VideoPlay /></el-icon>
                     {{ isProcessing ? '处理中...' : '开始处理' }}
-              </button>
-                </div>
-                <div class="col-md-6">
-                  <button class="btn btn-outline-secondary btn-lg w-100" @click="cancelSelection" :disabled="isProcessing">
+                  </el-button>
+                </el-col>
+                <el-col :span="12">
+                  <el-button 
+                    size="large" 
+                    style="width: 100%;" 
+                    @click="cancelSelection" 
+                    :disabled="isProcessing">
                     <el-icon><CircleClose /></el-icon>
                     取消
-              </button>
-                </div>
-              </div>
+                  </el-button>
+                </el-col>
+              </el-row>
             </div>
           </div>
-        </div>
-      </div>
-    </div>
+        </el-card>
+      </el-col>
+    </el-row>
 
     <!-- 处理结果列表 -->
-    <div class="glass-card mt-4">
-      <div class="card-header">
-        <h6><el-icon><Clock /></el-icon> 处理历史</h6>
+    <el-card class="glass-card" style="margin-top: 20px;">
+      <template #header>
+        <div class="card-header">
+          <h6><el-icon><Clock /></el-icon> 处理历史</h6>
+        </div>
+      </template>
+      
+      <div v-if="loadingResults" v-loading="loadingResults" class="text-center" style="padding: 40px 0; min-height: 120px;">
+        <p>加载处理历史...</p>
       </div>
-      <div class="card-body">
-        <div v-if="loadingResults" class="text-center py-4">
-          <div class="spinner-border text-primary" role="status">
-            <span class="visually-hidden">加载中...</span>
-          </div>
-          <p class="mt-3">加载处理历史...</p>
-        </div>
 
-        <div v-else-if="results.length === 0" class="text-center py-4">
-          <i class="fas fa-history fa-3x text-muted mb-3"></i>
-          <p class="text-muted">未找到处理历史</p>
-        </div>
+      <el-empty v-else-if="results.length === 0" description="未找到处理历史">
+        <template #image>
+          <el-icon size="60"><Clock /></el-icon>
+        </template>
+      </el-empty>
 
-        <div v-else class="table-responsive">
-          <table class="table table-hover">
-            <thead>
-              <tr>
-                <th>文件夹</th>
-                <th>状态</th>
-                <th>处理时间</th>
-                <th>创建时间</th>
-                <th>操作</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="result in results" :key="result.task_id || result.name">
-                <td>{{ result.source_path ? result.source_path.split('/').pop() : result.name }}</td>
-                <td>
-                  <span class="badge" :class="{
-                    'bg-success': result.status === 'completed',
-                    'bg-danger': result.status === 'failed',
-                    'bg-warning': result.status === 'cancelled',
-                    'bg-secondary': result.status === 'unknown'
-                  }">{{ result.status }}</span>
-                </td>
-                <td>{{ result.processing_time ? formatTime(result.processing_time) : 'N/A' }}</td>
-                <td>{{ result.timestamp ? formatDate(result.timestamp) : 'Unknown' }}</td>
-                <td>
-                  <button class="btn btn-sm btn-outline-primary me-1" 
-                          style="max-width: 32px; max-height: 32px;" 
-                          @click="viewResultDetails(result)">
-                    <i class="fas fa-eye"></i>
-                  </button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
+      <el-table v-else :data="results" stripe style="width: 100%">
+        <el-table-column prop="name" label="文件夹">
+          <template #default="scope">
+            {{ scope.row.source_path ? scope.row.source_path.split('/').pop() : scope.row.name }}
+          </template>
+        </el-table-column>
+        <el-table-column prop="status" label="状态">
+          <template #default="scope">
+            <el-tag :type="getStatusTagType(scope.row.status)">
+              {{ scope.row.status }}
+            </el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column prop="processing_time" label="处理时间">
+          <template #default="scope">
+            {{ scope.row.processing_time ? formatTime(scope.row.processing_time) : 'N/A' }}
+          </template>
+        </el-table-column>
+        <el-table-column prop="timestamp" label="创建时间">
+          <template #default="scope">
+            {{ scope.row.timestamp ? formatDate(scope.row.timestamp) : 'Unknown' }}
+          </template>
+        </el-table-column>
+        <el-table-column label="操作" width="80">
+          <template #default="scope">
+            <el-button 
+              size="small" 
+              type="primary" 
+              :icon="View"
+              circle
+              @click="viewResultDetails(scope.row)" />
+          </template>
+        </el-table-column>
+      </el-table>
+    </el-card>
 
-    <el-dialog v-model="resultsDialogVisible" :title="`'${selectedResultFolder}' 的处理结果`" width="50%" class="glass-dialog">
+    <el-dialog 
+      v-model="resultsDialogVisible" 
+      :title="`'${selectedResultFolder}' 的处理结果`" 
+      width="50%" 
+      class="glass-dialog">
       <el-table :data="currentResultFiles" stripe style="width: 100%">
         <el-table-column prop="name" label="文件名" sortable />
         <el-table-column prop="size" label="大小" sortable>
@@ -259,17 +272,13 @@
 </template>
 
 <script setup lang="ts" name="PointCloudProcess">
-import { computed, onMounted, onBeforeUnmount } from 'vue'
+import { computed, onMounted, } from 'vue'
 import { usePointCloudStore } from '@/stores/pointCloudStore'
-import { 
-  Folder, 
-  Connection, 
-  Setting, 
-  VideoPlay, 
-  CircleClose, 
-  Clock, 
-  Loading 
+import { Folder, FolderOpened,Connection, Setting, VideoPlay, 
+  CircleClose, Clock, Box,Close,View,Refresh,Picture,Calendar
 } from '@element-plus/icons-vue'
+import { ElButton,ElDialog,ElTable,ElTableColumn,
+  ElTag,ElCard,ElCol,ElRow,ElEmpty,ElIcon } from 'element-plus'
 
 // 使用 Pinia store
 const pointCloudStore = usePointCloudStore()
@@ -342,20 +351,48 @@ const closeResultsDialog = () => {
   pointCloudStore.closeResultsDialog()
 }
 
-const handleAutoProcess = (data: any) => {
-  if (data && data.folder_name) {
-    // 自动选择并处理指定的文件夹
-    const folder = folders.value.find((f: any) => f.name === data.folder_name)
-    if (folder) {
-      selectFolder(folder)
-      processSelectedFolder()
-    }
+
+const updateProcessingOptionsValue = (value: boolean) => {
+  pointCloudStore.updateProcessingOptions({ resize: value })
+}
+
+// Element Plus 组件状态处理方法
+const getTaskTagType = (status: string) => {
+  switch (status) {
+    case 'completed': return 'success'
+    case 'failed': return 'danger'
+    case 'cancelled': return 'warning'
+    case 'processing': return 'primary'
+    default: return 'info'
   }
 }
 
-const updateProcessingOptions = (event: Event) => {
-  const target = event.target as HTMLInputElement
-  pointCloudStore.updateProcessingOptions({ resize: target.checked })
+const getProgressStatus = (status: string) => {
+  switch (status) {
+    case 'completed': return 'success'
+    case 'failed': return 'exception'
+    case 'cancelled': return 'warning'
+    default: return undefined
+  }
+}
+
+const getAlertType = (status: string) => {
+  switch (status) {
+    case 'completed': return 'success'
+    case 'failed': return 'error'
+    case 'cancelled': return 'warning'
+    case 'processing': return 'info'
+    default: return 'info'
+  }
+}
+
+const getStatusTagType = (status: string) => {
+  switch (status) {
+    case 'completed': return 'success'
+    case 'failed': return 'danger'
+    case 'cancelled': return 'warning'
+    default: return 'info'
+  }
 }
 
 const formatTime = (seconds: number | undefined): string => {
@@ -387,6 +424,6 @@ const formatFileSize = (bytes: number): string => {
 }
 </script>
 
-<style scoped src="../../asset/porgress/pointCloudProcessor.css">
+<style scoped src="../../asset/progress/pointCloudProcessor.css">
 
 </style>

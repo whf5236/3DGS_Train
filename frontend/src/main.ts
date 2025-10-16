@@ -23,5 +23,4 @@ async function initApp() {
   app.mount('#app')
 }
 
-// 初始化应用
 initApp()

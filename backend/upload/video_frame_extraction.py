@@ -1,14 +1,12 @@
 import os
 import cv2
-import asyncio
 from pathlib import Path
 from typing import List, Optional
 from fastapi import UploadFile, HTTPException
 import tempfile
-import shutil
+
 from datetime import datetime
 import json
-
 class VideoFrameExtractor:
     """视频帧提取器"""
     

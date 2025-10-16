@@ -608,7 +608,7 @@ const submitUpload = async () => {
     
     const form = new FormData()
     form.append('username', username.value)
-    form.append('upload_component', 'pointcloud')
+    form.append('stage', 'colmap')
     
     if (folderName.value && folderName.value.trim()) {
       form.append('custom_folder_name', folderName.value.trim())
@@ -637,7 +637,7 @@ const submitUpload = async () => {
       }
     }
     
-    const res = await api.post('/upload_images', form, {
+    const res = await api.post('/upload/upload_images', form, {
       headers: { 'Content-Type': 'multipart/form-data' },
       onUploadProgress: (progressEvent) => {
         if (progressEvent.total) {
@@ -649,10 +649,10 @@ const submitUpload = async () => {
     uploadProgress.status = 'success'
     uploadProgress.percentage = 100
     uploadProgress.completed = fileList.value.length
-    uploadProgress.targetFolder = res.data.folder_structure.full_path
+    uploadProgress.targetFolder = res.data.folder_info.target_path
     uploadProgress.processStatus = '点云文件上传完成'
     
-    ElMessage.success(`点云文件上传成功：保存至 ${res.data.folder_structure.folder_name}`)
+    ElMessage.success(`点云文件上传成功：保存至 ${res.data.folder_info.folder_name}`)
     clearFiles()
     
   } catch (error: any) {
