@@ -104,10 +104,10 @@ import { ElContainer, ElAside, ElMain, ElMenu, ElMenuItem,
   ElMenuItemGroup,ElIcon, ElSubMenu, ElScrollbar,  } from 'element-plus'
 import ImageUpload from './FileUpload/ImageUpload.vue'
 import VideoUpload from './FileUpload/VideoUpload.vue'
-import FileList from './FileUpload/FileList.vue'
 import FolderUpload from './FileUpload/FolderUpload.vue'
 import SplatUpload from './FileUpload/SplatUpload.vue'
 import PointCloudProcessor from './Progress/PointCloudProcessor.vue'
+import TrainingComponent from './Progress/TrainingComponent.vue'
 const activeIndex = ref('1-1')
 
 // 菜单选择事件处理
@@ -139,6 +139,7 @@ const mainComponent = computed(() => {
       case '2-1':
         return markRaw(PointCloudProcessor)
       case '2-2':
+        return markRaw(TrainingComponent)
       default:
         return null
     }

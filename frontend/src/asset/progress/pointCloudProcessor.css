@@ -2,17 +2,7 @@
   color: #fff;
 }
 
-.processor-layout {
-  display: flex;
-  gap: 20px;
-}
-.layout-left {
-  flex: 1;
-}
-.layout-right {
-  flex: 2;
-}
-
+/* 移除flex布局，使用Element Plus的栅格布局 */
 .glass-card {
   background: rgba(255, 255, 255, 0.1);
   -webkit-backdrop-filter: blur(5px);
@@ -45,6 +35,41 @@
   font-weight: 600;
   color: #ffffff;
   margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* COLMAP 选项样式 */
+.option-card {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+}
+
+.option-card .el-card__header {
+  background: rgba(255, 255, 255, 0.08);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 12px 16px;
+}
+
+.option-title {
+  color: #ffffff;
+  font-weight: 500;
+  font-size: 14px;
+}
+
+.option-description {
+  margin-top: 4px;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.section-title {
+  color: #ffffff;
+  font-weight: 600;
+  margin-bottom: 16px;
   display: flex;
   align-items: center;
   gap: 8px;

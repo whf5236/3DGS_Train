@@ -5,6 +5,7 @@ from pathlib import Path
 from datetime import datetime
 import os
 import json
+import asyncio
 from ..websocket.manager import manager
 from .video_frame_extraction import VideoFrameExtractor
 
@@ -491,7 +492,15 @@ async def _get_stage_folders(stage_dir: Path, stage: str, username: str):
 @router.post("/point-cloud/process")
 async def process_point_cloud(
     username: str = Form(...),
-    folder_name: str = Form(...)
+    folder_name: str = Form(...),
+    # COLMAP 处理选项
+    output_folder_name: str = Form(""),
+    camera_model: str = Form("OPENCV"),
+    no_gpu: bool = Form(False),
+    skip_matching: bool = Form(False),
+    resize: bool = Form(False),
+    colmap_executable: str = Form(""),
+    magick_executable: str = Form("")
 ):
     try:
         # 验证用户文件夹是否存在
@@ -515,34 +524,144 @@ async def process_point_cloud(
         if not image_files:
             raise HTTPException(status_code=400, detail="源文件夹中没有找到图片文件")
         
+        # 确定输出文件夹名称
+        if output_folder_name.strip():
+            # 使用用户自定义的文件夹名称
+            output_name = output_folder_name.strip()
+        else:
+            # 使用默认规则：将 'image' 前缀改为 'colmap'
+            if folder_name.startswith('image'):
+                output_name = folder_name.replace('image', 'colmap', 1)
+            else:
+                output_name = f"colmap_{folder_name}"
+        
         # 创建目标文件夹（colmap 阶段）
-        target_folder = user_folder / "colmap" / folder_name
+        target_folder = user_folder / "colmap" / output_name
         target_folder.mkdir(parents=True, exist_ok=True)
+        
+        # 创建输入文件夹并复制图片
+        input_folder = target_folder / "input"
+        input_folder.mkdir(exist_ok=True)
+        
+        # 复制图片到输入文件夹
+        import shutil
+        for image_file in image_files:
+            dest_path = input_folder / image_file.name
+            shutil.copy2(image_file, dest_path)
         
         # 生成任务 ID
         import uuid
         task_id = str(uuid.uuid4())
         
-
+        # 构建处理选项
+        processing_options = {
+            'camera_model': camera_model,
+            'no_gpu': no_gpu,
+            'skip_matching': skip_matching,
+            'resize': resize
+        }
+        
         # 通过 WebSocket 通知处理开始
         await manager.send_message_to_user(username, {
             "type": "point_cloud_processing_started",
             "task_id": task_id,
-            "folder_name": folder_name,
+            "folder_name": output_name,  
             "status": "processing",
-            "message": f"开始处理点云: {folder_name}"
+            "message": f"开始处理点云: {folder_name} -> {output_name}"
         })
+        
+        # 启动异步处理
+        asyncio.create_task(_process_colmap_async(
+            task_id=task_id,
+            username=username,
+            folder_name=output_name, 
+            source_path=str(target_folder),
+            options=processing_options,
+            colmap_executable=colmap_executable,
+            magick_executable=magick_executable
+        ))
          
         return {
             "success": True,
             "message": "点云处理已启动",
             "task_id": task_id,
             "folder_name": folder_name,
+            "output_folder_name": output_name,
             "source_path": str(source_folder),
             "target_path": str(target_folder)
         }
         
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"启动点云处理失败: {str(e)}")
+
+
+async def _process_colmap_async(
+    task_id: str,
+    username: str, 
+    folder_name: str,
+    source_path: str,
+    options: dict,
+    colmap_executable: str = "",
+    magick_executable: str = ""
+):
+    """异步处理 COLMAP 点云生成"""
+    try:
+        from gs.colmap_processor import ColmapProcessor
+        
+        # 创建进度回调函数
+        async def progress_callback(progress: int, message: str):
+            await manager.send_message_to_user(username, {
+                "type": "point_cloud_processing_progress",
+                "task_id": task_id,
+                "folder_name": folder_name,
+                "status": "processing",
+                "progress": progress,
+                "message": message
+            })
+        
+        # 创建 COLMAP 处理器
+        processor = ColmapProcessor(
+            colmap_executable=colmap_executable,
+            magick_executable=magick_executable,
+            progress_callback=progress_callback
+        )
+        
+        # 执行处理
+        result = await processor.process_images(source_path, options)
+        
+        if result["success"]:
+            # 处理成功
+            await manager.send_message_to_user(username, {
+                "type": "point_cloud_processing_completed",
+                "task_id": task_id,
+                "folder_name": folder_name,
+                "status": "completed",
+                "progress": 100,
+                "message": "COLMAP 处理完成",
+                "output_folder": result["output_path"]
+            })
+        else:
+            # 处理失败
+            await manager.send_message_to_user(username, {
+                "type": "point_cloud_processing_failed",
+                "task_id": task_id,
+                "folder_name": folder_name,
+                "status": "failed",
+                "progress": 0,
+                "message": result["message"],
+                "error": result.get("error", "未知错误")
+            })
+            
+    except Exception as e:
+        # 处理异常
+        await manager.send_message_to_user(username, {
+            "type": "point_cloud_processing_failed",
+            "task_id": task_id,
+            "folder_name": folder_name,
+            "status": "failed",
+            "progress": 0,
+            "message": f"COLMAP 处理失败: {str(e)}",
+            "error": str(e)
+        })
 
 

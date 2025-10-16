@@ -41,7 +41,18 @@ export interface ResultFile {
 }
 
 export interface ProcessingOptions {
+  // 基础选项
+  output_folder_name: string
   resize: boolean
+  camera_model: 'OPENCV' | 'PINHOLE' | 'RADIAL' | 'SIMPLE_RADIAL'
+  
+  // 高级选项
+  no_gpu: boolean
+  skip_matching: boolean
+  
+  // 可执行文件路径
+  colmap_executable: string
+  magick_executable: string
 }
 
 export const usePointCloudStore = defineStore('pointCloud', {
@@ -73,7 +84,18 @@ export const usePointCloudStore = defineStore('pointCloud', {
     
     // 处理选项
     processingOptions: {
-      resize: true
+      // 基础选项
+      output_folder_name: '',
+      resize: true,
+      camera_model: 'OPENCV',
+      
+      // 高级选项
+      no_gpu: false,
+      skip_matching: false,
+      
+      // 可执行文件路径
+      colmap_executable: '',
+      magick_executable: ''
     } as ProcessingOptions,
     
     // 处理历史
@@ -209,6 +231,20 @@ export const usePointCloudStore = defineStore('pointCloud', {
         const formData = new FormData()
         formData.append('username', username)
         formData.append('folder_name', folderName)
+        
+        // 添加处理选项
+        formData.append('camera_model', this.processingOptions.camera_model)
+        formData.append('no_gpu', this.processingOptions.no_gpu.toString())
+        formData.append('skip_matching', this.processingOptions.skip_matching.toString())
+        formData.append('resize', this.processingOptions.resize.toString())
+        
+        // 可选的可执行文件路径
+        if (this.processingOptions.colmap_executable) {
+          formData.append('colmap_executable', this.processingOptions.colmap_executable)
+        }
+        if (this.processingOptions.magick_executable) {
+          formData.append('magick_executable', this.processingOptions.magick_executable)
+        }
         
         const response = await api.post('/upload/point-cloud/process', formData)
 

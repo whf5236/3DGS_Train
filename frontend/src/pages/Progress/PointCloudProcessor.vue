@@ -42,6 +42,42 @@
               </div>
             </div>
           </div>
+
+          <!-- 选中文件夹的详细信息 -->
+          <div v-if="selectedFolder && selectedFolderDetails" class="folder-details" style="margin-top: 20px;">
+            <el-divider content-position="left">
+              <span style="font-size: 14px; color: #606266;">文件夹详情</span>
+            </el-divider>
+            
+            <el-row :gutter="16">
+              <el-col :span="12">
+                <el-card class="info-card" shadow="hover">
+                  <div class="info-content">
+                    <div class="info-icon">
+                      <el-icon size="24" color="#409EFF"><Picture /></el-icon>
+                    </div>
+                    <div>
+                      <div class="info-label">图片数量</div>
+                      <div class="info-value">{{ selectedFolderDetails?.image_count || 0 }}</div>
+                    </div>
+                  </div>
+                </el-card>
+              </el-col>
+              <el-col :span="12">
+                <el-card class="info-card" shadow="hover">
+                  <div class="info-content">
+                    <div class="info-icon">
+                      <el-icon size="24" color="#67C23A"><Calendar /></el-icon>
+                    </div>
+                    <div>
+                      <div class="info-label">创建时间</div>
+                      <div class="info-value">{{ formatDate(selectedFolderDetails?.created_time) }}</div>
+                    </div>
+                  </div>
+                </el-card>
+              </el-col>
+            </el-row>
+          </div>
         </el-card>
       </el-col>
 
@@ -119,44 +155,118 @@
           <div v-else-if="selectedFolder" class="folder-details-view">
             <h5 style="margin-bottom: 20px;">{{ selectedFolder }}</h5>
 
-            <el-row :gutter="16" style="margin-bottom: 20px;">
-              <el-col :span="12">
-                <el-card class="info-card" shadow="hover">
-                  <div class="info-content">
-                    <div class="info-icon">
-                      <el-icon size="24" color="#409EFF"><Picture /></el-icon>
-                    </div>
-                    <div>
-                      <div class="info-label">图片数量</div>
-                      <div class="info-value">{{ selectedFolderDetails?.image_count || 0 }}</div>
-                    </div>
-                  </div>
-                </el-card>
-              </el-col>
-              <el-col :span="12">
-                <el-card class="info-card" shadow="hover">
-                  <div class="info-content">
-                    <div class="info-icon">
-                      <el-icon size="24" color="#67C23A"><Calendar /></el-icon>
-                    </div>
-                    <div>
-                      <div class="info-label">创建时间</div>
-                      <div class="info-value">{{ formatDate(selectedFolderDetails?.created_time) }}</div>
-                    </div>
-                  </div>
-                </el-card>
-              </el-col>
-            </el-row>
-
             <div class="processing-options" style="margin-bottom: 20px;">
               <h6 class="section-title">
-                <el-icon><Setting /></el-icon> 处理选项
+                <el-icon><Setting /></el-icon> COLMAP 处理选项
               </h6>
-              <el-checkbox 
-                v-model="processingOptions.resize" 
-                @change="updateProcessingOptionsValue">
-                生成缩放后的图片（推荐）
-              </el-checkbox>
+              
+              <!-- 基础选项 -->
+              <el-card class="option-card" shadow="never">
+                <template #header>
+                  <span class="option-title">基础设置</span>
+                </template>
+                
+                <el-form :model="processingOptions" label-width="120px" size="small">
+                  <el-form-item label="输出文件夹名">
+                    <el-input 
+                      v-model="processingOptions.output_folder_name" 
+                      :placeholder="getDefaultOutputFolderName()"
+                      @input="updateProcessingOptionsValue">
+                      <template #prepend>
+                        <el-icon><Folder /></el-icon>
+                      </template>
+                    </el-input>
+                    <div class="option-description">
+                      <small>留空则自动将 'image' 前缀改为 'colmap'，或输入自定义文件夹名</small>
+                    </div>
+                  </el-form-item>
+                  
+                  <el-form-item label="相机模型">
+                    <el-select v-model="processingOptions.camera_model" @change="updateProcessingOptionsValue">
+                      <el-option label="OPENCV" value="OPENCV" />
+                      <el-option label="PINHOLE" value="PINHOLE" />
+                      <el-option label="RADIAL" value="RADIAL" />
+                      <el-option label="SIMPLE_RADIAL" value="SIMPLE_RADIAL" />
+                    </el-select>
+                    <div class="option-description">
+                      <small>OPENCV：适用于大多数相机；PINHOLE：理想针孔相机模型</small>
+                    </div>
+                  </el-form-item>
+                </el-form>
+              </el-card>
+              
+              <!-- 高级选项 -->
+              <el-card class="option-card" shadow="never" style="margin-top: 16px;">
+                <template #header>
+                  <span class="option-title">高级设置</span>
+                </template>
+                
+                <el-form :model="processingOptions" label-width="120px" size="small">
+                  <el-form-item>
+                    <el-checkbox 
+                      v-model="processingOptions.no_gpu" 
+                      @change="updateProcessingOptionsValue">
+                      禁用 GPU 加速
+                    </el-checkbox>
+                    <div class="option-description">
+                      <small>如果遇到 GPU 相关问题，可以禁用 GPU 加速</small>
+                    </div>
+                  </el-form-item>
+                  
+                  <el-form-item>
+                    <el-checkbox 
+                      v-model="processingOptions.skip_matching" 
+                      @change="updateProcessingOptionsValue">
+                      跳过特征匹配
+                    </el-checkbox>
+                    <div class="option-description">
+                      <small>如果已有预处理的特征数据，可以跳过特征提取和匹配步骤</small>
+                    </div>
+                  </el-form-item>
+                  
+                  <el-form-item>
+                    <el-checkbox 
+                      v-model="processingOptions.resize" 
+                      @change="updateProcessingOptionsValue">
+                      生成多分辨率图像
+                    </el-checkbox>
+                    <div class="option-description">
+                      <small>生成 50%、25%、12.5% 分辨率的图像，用于多尺度训练</small>
+                    </div>
+                  </el-form-item>
+                </el-form>
+              </el-card>
+              
+              <!-- 可执行文件路径 -->
+              <el-card class="option-card" shadow="never" style="margin-top: 16px;">
+                <template #header>
+                  <span class="option-title">可执行文件路径（可选）</span>
+                </template>
+                
+                <el-form :model="processingOptions" label-width="120px" size="small">
+                  <el-form-item label="COLMAP 路径">
+                    <el-input 
+                      v-model="processingOptions.colmap_executable" 
+                      placeholder="留空使用系统默认 colmap"
+                      @input="updateProcessingOptionsValue">
+                      <template #prepend>
+                        <el-icon><FolderOpened /></el-icon>
+                      </template>
+                    </el-input>
+                  </el-form-item>
+                  
+                  <el-form-item label="ImageMagick 路径">
+                    <el-input 
+                      v-model="processingOptions.magick_executable" 
+                      placeholder="留空使用系统默认 magick"
+                      @input="updateProcessingOptionsValue">
+                      <template #prepend>
+                        <el-icon><FolderOpened /></el-icon>
+                      </template>
+                    </el-input>
+                  </el-form-item>
+                </el-form>
+              </el-card>
             </div>
 
             <div class="processing-actions">
@@ -352,8 +462,22 @@ const closeResultsDialog = () => {
 }
 
 
-const updateProcessingOptionsValue = (value: boolean) => {
-  pointCloudStore.updateProcessingOptions({ resize: value })
+const updateProcessingOptionsValue = () => {
+  // 这个方法会在任何选项改变时被调用
+  // 由于我们使用 v-model 绑定到 processingOptions，
+  // 数据会自动更新，这里可以添加额外的逻辑
+}
+
+const getDefaultOutputFolderName = (): string => {
+  if (!selectedFolder.value) return ''
+  
+  // 如果文件夹名以 'image' 开头，将其替换为 'colmap'
+  if (selectedFolder.value.startsWith('image')) {
+    return selectedFolder.value.replace(/^image/, 'colmap')
+  }
+  
+  // 否则在前面添加 'colmap_' 前缀
+  return `colmap_${selectedFolder.value}`
 }
 
 // Element Plus 组件状态处理方法

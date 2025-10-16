@@ -74,9 +74,7 @@ class VideoFrameExtractor:
             duration = total_frames / original_fps if original_fps > 0 else 0
             width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
             height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-            
-            extracted_frames = 0
-            
+                      
             if extract_all:
                 # 提取所有帧
                 frame_interval = 1
