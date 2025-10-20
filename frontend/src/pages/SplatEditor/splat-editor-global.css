@@ -1,0 +1,85 @@
+/* SuperSplat 编辑器全局样式隔离 */
+
+#splat-editor-root {
+  width: 100%;
+  height: 100%;
+}
+
+#splat-editor-root #app-container {
+  width: 100%;
+  height: 100%;
+  all: revert;
+  font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+}
+
+/* 重置 Element Plus 的影响 */
+#splat-editor-root * {
+  box-sizing: border-box;
+}
+
+/* Canvas 样式 */
+#splat-editor-root canvas {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/* 禁用 Element Plus 的全局样式影响 */
+#splat-editor-root .el-scrollbar,
+#splat-editor-root .el-container,
+#splat-editor-root .el-menu,
+#splat-editor-root .el-button {
+  all: revert;
+}
+
+/* PCUI 容器样式 */
+#splat-editor-root .pcui-container {
+  width: 100%;
+  height: 100%;
+}
+
+/* 处理菜单样式 */
+#editor-container {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+/* 防止外部样式污染 */
+#app-container {
+  background-color: #1a1a1a !important;
+  color: #ffffff !important;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+}
+
+/* 工具栏样式 */
+#top-container,
+#bottom-container,
+#right-container {
+  position: absolute;
+  z-index: 100;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+}
+
+/* Canvas 容器 */
+#canvas-container {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+/* 工具层 */
+#tools-container {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+}
+
+#tools-container canvas {
+  pointer-events: auto;
+}

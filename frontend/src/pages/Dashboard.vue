@@ -48,6 +48,10 @@
                 <el-icon><Search /></el-icon>
                 训练处理
               </el-menu-item>
+              <el-menu-item index="2-4">
+                <el-icon><Edit /></el-icon>
+                点云编辑
+              </el-menu-item>
             </el-menu-item-group>
             <el-menu-item-group title="文件处理">
               <el-menu-item index="2-3">
@@ -99,7 +103,7 @@
 import { ref, computed, markRaw } from 'vue'
 import { 
   Upload, Picture, VideoPlay, Document, Folder, List, Search, 
-  Operation, Setting, User, Tools, Box, } from '@element-plus/icons-vue'
+  Operation, Setting, User, Tools, Box, Edit } from '@element-plus/icons-vue'
 import { ElContainer, ElAside, ElMain, ElMenu, ElMenuItem, 
   ElMenuItemGroup,ElIcon, ElSubMenu, ElScrollbar,  } from 'element-plus'
 import ImageUpload from './FileUpload/ImageUpload.vue'
@@ -108,6 +112,8 @@ import FolderUpload from './FileUpload/FolderUpload.vue'
 import SplatUpload from './FileUpload/SplatUpload.vue'
 import PointCloudProcessor from './Progress/PointCloudProcessor.vue'
 import TrainingComponent from './Progress/TrainingComponent.vue'
+import SplatEditorWrapper from './SplatEditor/SplatEditorWrapper.vue'
+
 const activeIndex = ref('1-1')
 
 // 菜单选择事件处理
@@ -140,6 +146,8 @@ const mainComponent = computed(() => {
         return markRaw(PointCloudProcessor)
       case '2-2':
         return markRaw(TrainingComponent)
+      case '2-4':
+        return markRaw(SplatEditorWrapper)
       default:
         return null
     }

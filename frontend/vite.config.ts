@@ -18,9 +18,28 @@ export default defineConfig({
       resolvers: [ElementPlusResolver()],
     }),
   ],
+  define: {
+    __VERSION__: JSON.stringify('2.12.2'),
+  },
   resolve: {
     alias: {
-      '@': fileURLToPath(new URL('./src', import.meta.url))
+      '@': fileURLToPath(new URL('./src', import.meta.url)),
     },
   },
+  css: {
+    preprocessorOptions: {
+      scss: {
+        api: 'modern-compiler',
+        quietDeps: true,
+        includePaths: ['node_modules'],
+      }
+    }
+  },
+  assetsInclude: ['**/*.ply', '**/*.splat', '**/*.glb', '**/*.gltf'],
+  server: {
+    fs: {
+      strict: false
+    }
+  }
 })
+

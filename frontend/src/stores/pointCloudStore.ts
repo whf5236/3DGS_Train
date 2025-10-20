@@ -232,11 +232,15 @@ export const usePointCloudStore = defineStore('pointCloud', {
         formData.append('username', username)
         formData.append('folder_name', folderName)
         
+        // 添加输出文件夹名称
+        formData.append('output_folder_name', this.processingOptions.output_folder_name || '')
+        
         // 添加处理选项
         formData.append('camera_model', this.processingOptions.camera_model)
-        formData.append('no_gpu', this.processingOptions.no_gpu.toString())
-        formData.append('skip_matching', this.processingOptions.skip_matching.toString())
-        formData.append('resize', this.processingOptions.resize.toString())
+        // FastAPI Form 布尔值：使用小写的 'true'/'false' 字符串
+        formData.append('no_gpu', this.processingOptions.no_gpu ? 'true' : 'false')
+        formData.append('skip_matching', this.processingOptions.skip_matching ? 'true' : 'false')
+        formData.append('resize', this.processingOptions.resize ? 'true' : 'false')
         
         // 可选的可执行文件路径
         if (this.processingOptions.colmap_executable) {
@@ -246,7 +250,11 @@ export const usePointCloudStore = defineStore('pointCloud', {
           formData.append('magick_executable', this.processingOptions.magick_executable)
         }
         
-        const response = await api.post('/upload/point-cloud/process', formData)
+        const response = await api.post('/upload/point-cloud/process', formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data'
+          }
+        })
 
         // 设置当前任务
         this.currentTask = {
@@ -261,8 +269,14 @@ export const usePointCloudStore = defineStore('pointCloud', {
         await this.subscribeToTaskUpdates(response.data.task_id)
       } catch (error: any) {
         console.error('Error starting processing:', error)
+        console.error('Error response:', error.response?.data)
+        console.error('Error status:', error.response?.status)
         this.processingFolder = null
-        this.error = 'Failed to start processing. Please try again.'
+        
+        // 显示更详细的错误信息
+        const errorMessage = error.response?.data?.detail || error.message || 'Failed to start processing. Please try again.'
+        this.error = errorMessage
+        
         throw error
       }
     },
@@ -273,10 +287,25 @@ export const usePointCloudStore = defineStore('pointCloud', {
         this.wsService = usePointCloudWebSocket()
       }
       
-      this.wsConnected = true
-      
       // 设置 WebSocket 消息监听器
       this.setupWebSocketListeners()
+      
+      // 等待连接建立
+      if (!this.wsService.isConnected.value) {
+        // 如果未连接，等待连接建立（最多等待5秒）
+        const maxWaitTime = 5000
+        const startTime = Date.now()
+        
+        while (!this.wsService.isConnected.value && (Date.now() - startTime) < maxWaitTime) {
+          await new Promise(resolve => setTimeout(resolve, 100))
+        }
+        
+        if (!this.wsService.isConnected.value) {
+          console.warn('WebSocket 连接超时，继续执行...')
+        }
+      }
+      
+      this.wsConnected = this.wsService.isConnected.value
     },
 
     // 设置 WebSocket 消息监听器

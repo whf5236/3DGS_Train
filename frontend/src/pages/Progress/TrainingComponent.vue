@@ -62,7 +62,7 @@
         <div class="card-header">
           <h5>
             <el-icon><Setting /></el-icon>
-            Training Parameters
+            训练参数
           </h5>
         </div>
       </template>
@@ -70,7 +70,7 @@
       <!-- 基本参数 -->
       <el-card class="parameter-group">
         <template #header>
-          <h6>Basic Parameters</h6>
+          <h6>基础参数</h6>
         </template>
 
         <el-row :gutter="20" class="parameter-row">
@@ -79,7 +79,7 @@
               <template #label>
                 <span>
                   Iterations
-                  <el-tooltip content="Number of total iterations to train for" placement="top">
+                  <el-tooltip content="训练的总迭代次数" placement="top">
                     <el-icon><QuestionFilled /></el-icon>
                   </el-tooltip>
                 </span>
@@ -608,7 +608,7 @@
           <el-col :span="12">
             <el-form-item>
               <el-checkbox v-model="trainingParams.quiet">
-                安静模式
+                静默模式
               </el-checkbox>
               <div class="parameter-description">忽略任何写入标准输出的文本</div>
             </el-form-item>
@@ -780,13 +780,13 @@
 </template>
 
 <script setup name="TrainingComponent">
-import { shallowRef, onMounted, onBeforeUnmount } from 'vue';
+import {  onMounted, onBeforeUnmount } from 'vue';
 import { eventBus } from '@/utils/eventBus';
 import { useTrainingStore } from '@/stores/trainingStore';
 import { useTrainingComponent } from '@/composables/useTrainingComponent';
 import { useWebSocketConnection } from '@/composables/useWebSocket';
 import { TrainingUtils } from '@/utils/trainingUtils';
-import { ElNotification, ElMessage, ElCard, ElTag, } from 'element-plus';
+import {  ElCard, ElTag, } from 'element-plus';
 import { Delete, QuestionFilled, VideoPlay, VideoPause, RefreshLeft, 
   SwitchButton, View, Refresh, Clock,FolderOpened,Folder,Box,Setting
 } from '@element-plus/icons-vue';
@@ -861,72 +861,5 @@ onBeforeUnmount(() => {
 });
 </script>
 
-<style scoped>
-.parameter-section {
-  margin-bottom: 24px;
-}
-
-.parameter-row {
-  margin-bottom: 16px;
-}
-
-.parameter-description {
-  font-size: 12px;
-  color: #909399;
-  margin-top: 4px;
-}
-
-.range-value {
-  min-width: 60px;
-  text-align: center;
-  font-weight: 500;
-}
-
-.control-btn {
-  margin-right: 12px;
-  margin-bottom: 8px;
-}
-
-.action-buttons {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.training-actions {
-  display: flex;
-  gap: 12px;
-  flex-wrap: wrap;
-}
-
-.folder-item {
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.folder-item:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
-
-.folder-item.selected {
-  border-color: #409eff;
-  box-shadow: 0 0 0 2px rgba(64, 158, 255, 0.2);
-}
-
-.folder-icon {
-  font-size: 24px;
-  color: #409eff;
-  margin-bottom: 8px;
-}
-
-.folder-name {
-  font-weight: 500;
-  margin-bottom: 4px;
-}
-
-.folder-info {
-  font-size: 12px;
-  color: #909399;
-}
+<style scoped src="../../asset/progress/trainProcess.css">
 </style>

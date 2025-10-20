@@ -6,21 +6,6 @@ export function useWebSocketConnection() {
   const userStore = useUserStore()
   const ws = useWebSocket(userStore.token || undefined)
   
-  // 自动连接和断开
-  onMounted(async () => {
-    if (userStore.isAuthenticated) {
-      try {
-        await ws.connect()
-      } catch (error) {
-        console.error('WebSocket连接失败:', error)
-      }
-    }
-  })
-  
-  onUnmounted(() => {
-    ws.disconnect()
-  })
-  
   // 监听认证状态变化
   watch(() => userStore.isAuthenticated, async (isAuth) => {
     if (isAuth) {

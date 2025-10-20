@@ -32,7 +32,7 @@
               </div>
               <div class="folder-action">
                 <el-button 
-                  size="small" 
+                  size="large" 
                   type="primary" 
                   @click.stop="processFolder(folder)"
                   :disabled="isProcessing || processingFolder === folder.name"
@@ -236,37 +236,7 @@
                   </el-form-item>
                 </el-form>
               </el-card>
-              
-              <!-- 可执行文件路径 -->
-              <el-card class="option-card" shadow="never" style="margin-top: 16px;">
-                <template #header>
-                  <span class="option-title">可执行文件路径（可选）</span>
-                </template>
-                
-                <el-form :model="processingOptions" label-width="120px" size="small">
-                  <el-form-item label="COLMAP 路径">
-                    <el-input 
-                      v-model="processingOptions.colmap_executable" 
-                      placeholder="留空使用系统默认 colmap"
-                      @input="updateProcessingOptionsValue">
-                      <template #prepend>
-                        <el-icon><FolderOpened /></el-icon>
-                      </template>
-                    </el-input>
-                  </el-form-item>
-                  
-                  <el-form-item label="ImageMagick 路径">
-                    <el-input 
-                      v-model="processingOptions.magick_executable" 
-                      placeholder="留空使用系统默认 magick"
-                      @input="updateProcessingOptionsValue">
-                      <template #prepend>
-                        <el-icon><FolderOpened /></el-icon>
-                      </template>
-                    </el-input>
-                  </el-form-item>
-                </el-form>
-              </el-card>
+  
             </div>
 
             <div class="processing-actions">
@@ -416,7 +386,6 @@ onMounted(() => {
   pointCloudStore.fetchFolders()
   pointCloudStore.fetchResults()
 
-  
 })
 
 
@@ -430,12 +399,20 @@ const cancelSelection = () => {
 }
 
 const processFolder = async (folder: any) => {
-  await pointCloudStore.startProcessing(folder.name)
+  try {
+    await pointCloudStore.startProcessing(folder.name)
+  } catch (error) {
+    console.error('处理文件夹失败:', error)
+  }
 }
 
 const processSelectedFolder = async () => {
   if (!selectedFolder.value) return
-  await pointCloudStore.startProcessing(selectedFolder.value)
+  try {
+    await pointCloudStore.startProcessing(selectedFolder.value)
+  } catch (error) {
+    console.error('处理文件夹失败:', error)
+  }
 }
 
 const cancelTask = async () => {
