@@ -142,7 +142,7 @@ export const usePointCloudStore = defineStore('pointCloud', {
           throw new Error('用户名不存在')
         }
         // 直接获取 image 阶段的文件夹，这些是可以用于点云处理的输入
-        const response = await api.get(`/upload/get_files?username=${username}&stage=image`)
+        const response = await api.get(`/files/get_files?username=${username}&stage=image`)
 
         const imageFolders = response.data.folders || []
     
@@ -179,7 +179,7 @@ export const usePointCloudStore = defineStore('pointCloud', {
         if (!username) {
           throw new Error('用户名不存在')
         }   
-        const response = await api.get(`/upload/get_files?username=${username}&stage=colmap`)
+        const response = await api.get(`/files/get_files?username=${username}&stage=colmap`)
         console.log('colmapFolders', response.data.folders)
         const colmapFolders = response.data.folders || []
         this.results = colmapFolders.map((folder: any) => ({

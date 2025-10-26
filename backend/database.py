@@ -8,7 +8,7 @@ data_dir = Path(__file__).parent / "data"
 data_dir.mkdir(exist_ok=True)
 
 # 使用绝对路径
-SQLALCHEMY_DATABASE_URL = f"sqlite:///{data_dir}/test.db"
+SQLALCHEMY_DATABASE_URL = f"sqlite:///{data_dir}/user.db"
 
 engine = create_engine(
     SQLALCHEMY_DATABASE_URL, 

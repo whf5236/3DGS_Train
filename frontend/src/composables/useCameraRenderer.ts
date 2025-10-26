@@ -1,5 +1,3 @@
-// 相机渲染器组合函数，展示如何在WebGL中使用相机参数
-
 import { ref, watch, type Ref } from 'vue'
 import { Math3D, type Matrix4 } from '@/utils/math3d'
 

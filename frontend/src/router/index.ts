@@ -1,7 +1,7 @@
 import { createRouter, createWebHistory } from "vue-router";
 import { useUserStore } from "@/stores/userStore";
-import Home from "@/pages/Home.vue";
-import Login from "@/pages/Login.vue";
+import Home from "@/views/Home.vue";
+import Login from "@/views/Login.vue";
 // 定义路由
 const router = createRouter({
     history: createWebHistory(),
@@ -18,12 +18,12 @@ const router = createRouter({
     },
     {
         path:'/register',
-        component:()=>import('@/pages/Register.vue'),
+        component:()=>import('@/views/Register.vue'),
         meta:{layout:'AppLayout'}
     },
     {
         path:'/dashboard',
-        component:()=>import('@/pages/Dashboard.vue'),
+        component:()=>import('@/views/Dashboard.vue'),
         meta:{
             requiresAuth:true
         }
@@ -32,9 +32,6 @@ const router = createRouter({
 }
 
 )
-// 创建路由实例，配置路由历史模式为html
-
-// 全局前置守卫，控制路由跳转时候的权限验证
 
 router.beforeEach((to, from, next) =>{
     const userStore = useUserStore()

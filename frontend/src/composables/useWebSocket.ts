@@ -1,4 +1,4 @@
-import { onMounted, onUnmounted, watch } from 'vue'
+import { watch } from 'vue'
 import { useWebSocket, type WebSocketMessage } from '@/services/websocket'
 import { useUserStore } from '@/stores/userStore'
 

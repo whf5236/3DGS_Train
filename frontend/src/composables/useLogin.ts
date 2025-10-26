@@ -10,8 +10,10 @@ export function useLogin() {
     const error = ref('')
     const handleLogin = async () => { 
         if(!username.value|| !password.value){
-                error.value = '请输入用户名和密码'
+            error.value = '请输入用户名和密码'
+            return
         }
+        
         loading.value = true
         error.value = ''
         
@@ -28,7 +30,7 @@ export function useLogin() {
                 error.value = '登录失败：响应格式错误'
             }
             }catch(err:any){
-                
+                error.value = err.response?.data?.message || '登录失败'       
             }finally{
             loading.value = false
         }

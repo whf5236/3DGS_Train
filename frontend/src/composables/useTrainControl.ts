@@ -1,5 +1,5 @@
 import { ref, type Ref } from 'vue'
-// import type { ProgramInfo, Buffers } from '@/types/webgl' 
+import type { ProgramInfo, Buffers } from '@/types/webgl'
 
 export function useTrainControl(canvas: Ref<HTMLCanvasElement | null>) {
   const cameraId = ref<number>(0)
@@ -7,7 +7,7 @@ export function useTrainControl(canvas: Ref<HTMLCanvasElement | null>) {
   const connectionError = ref<string | null>(null)
   
   // 训练控制状态
-  const isTraining = ref<boolean>(false)
+  const isTraining = ref<boolean>(true)
   const currentIteration = ref<number>(0)
   const stopAtValue = ref<number>(-1)
   const renderGrad = ref<boolean>(false)
@@ -19,12 +19,23 @@ export function useTrainControl(canvas: Ref<HTMLCanvasElement | null>) {
     num_gaussians: number
     loss: number
     sh_degree: number
+    paused: boolean
+    train_params: Record<string, any>
   }>({
     iteration: 0,
     num_gaussians: 0,
     loss: 0,
-    sh_degree: 0
+    sh_degree: 0,
+    paused: false,
+    train_params: {}
   })
+
+  // Camera parameters
+  const cameraFov = ref<number>(45.0)  // degrees
+  const cameraYaw = ref<number>(0)
+  const cameraPitch = ref<number>(0)
+  const cameraDistance = ref<number>(5.0)
+  const resolution = ref<number>(800)
 
   let gl: WebGLRenderingContext | null = null
   let socket: WebSocket | null = null
@@ -146,35 +157,121 @@ export function useTrainControl(canvas: Ref<HTMLCanvasElement | null>) {
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4)
   }
 
-  function sendTrainingControl(trainingArgs: {
-    cameraId: number
-    doTraining: boolean
-    singleTrainingStep: boolean
-    stopAtValue: number
-    renderGrad: boolean
-  }) {
+  function getCameraMatrices() {
+    // Convert yaw/pitch to camera position
+    const yawRad = (cameraYaw.value * Math.PI) / 180
+    const pitchRad = (cameraPitch.value * Math.PI) / 180
+    
+    // Calculate camera position in spherical coordinates
+    const x = cameraDistance.value * Math.cos(pitchRad) * Math.sin(yawRad)
+    const y = cameraDistance.value * Math.sin(pitchRad)
+    const z = cameraDistance.value * Math.cos(pitchRad) * Math.cos(yawRad)
+    
+    // Look at origin
+    const eye = [x, y, z]
+    const target = [0, 0, 0]
+    const up = [0, 1, 0]
+    
+    // Build view matrix
+    const viewMatrix = lookAt(eye, target, up)
+    
+    // Build projection matrix
+    const fovRad = (cameraFov.value * Math.PI) / 180
+    const aspect = 1.0  // Square resolution
+    const near = 0.01
+    const far = 100.0
+    
+    const projMatrix = perspective(fovRad, aspect, near, far)
+    
+    // Compute view-projection matrix
+    const viewProjMatrix = multiplyMatrices(projMatrix, viewMatrix)
+    
+    return {
+      viewMatrix: viewMatrix,
+      viewProjMatrix: viewProjMatrix,
+      fovRad: fovRad
+    }
+  }
+
+  function lookAt(eye: number[], target: number[], up: number[]): number[] {
+    const zAxis = normalize([eye[0] - target[0], eye[1] - target[1], eye[2] - target[2]])
+    const xAxis = normalize(cross(up, zAxis))
+    const yAxis = cross(zAxis, xAxis)
+    
+    return [
+      xAxis[0], yAxis[0], zAxis[0], 0,
+      xAxis[1], yAxis[1], zAxis[1], 0,
+      xAxis[2], yAxis[2], zAxis[2], 0,
+      -dot(xAxis, eye), -dot(yAxis, eye), -dot(zAxis, eye), 1
+    ]
+  }
+
+  function perspective(fovy: number, aspect: number, near: number, far: number): number[] {
+    const f = 1.0 / Math.tan(fovy / 2)
+    const nf = 1 / (near - far)
+    
+    return [
+      f / aspect, 0, 0, 0,
+      0, f, 0, 0,
+      0, 0, (far + near) * nf, -1,
+      0, 0, 2 * far * near * nf, 0
+    ]
+  }
+
+  function multiplyMatrices(a: number[], b: number[]): number[] {
+    const result = new Array(16).fill(0)
+    for (let i = 0; i < 4; i++) {
+      for (let j = 0; j < 4; j++) {
+        for (let k = 0; k < 4; k++) {
+          result[i * 4 + j] += a[i * 4 + k] * b[k * 4 + j]
+        }
+      }
+    }
+    return result
+  }
+
+  function normalize(v: number[]): number[] {
+    const len = Math.sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2])
+    return [v[0] / len, v[1] / len, v[2] / len]
+  }
+
+  function cross(a: number[], b: number[]): number[] {
+    return [
+      a[1] * b[2] - a[2] * b[1],
+      a[2] * b[0] - a[0] * b[2],
+      a[0] * b[1] - a[1] * b[0]
+    ]
+  }
+
+  function dot(a: number[], b: number[]): number {
+    return a[0] * b[0] + a[1] * b[1] + a[2] * b[2]
+  }
+
+  function sendTrainingControl() {
     if (!socket || socket.readyState !== WebSocket.OPEN) return
     
-    // 发送训练控制参数，参考splatviz的实现
+    const { viewMatrix, viewProjMatrix, fovRad } = getCameraMatrices()
+    
     const message = {
-      camera_id: trainingArgs.cameraId,
-      do_training: trainingArgs.doTraining,
-      single_training_step: trainingArgs.singleTrainingStep,
-      stop_at_value: trainingArgs.stopAtValue,
-      render_grad: trainingArgs.renderGrad
+      resolution_x: resolution.value,
+      resolution_y: resolution.value,
+      train: isTraining.value,
+      fov_y: fovRad,
+      fov_x: fovRad,
+      z_near: 0.01,
+      z_far: 100.0,
+      shs_python: false,
+      rot_scale_python: false,
+      keep_alive: true,
+      scaling_modifier: 1.0,
+      view_matrix: viewMatrix,
+      view_projection_matrix: viewProjMatrix,
+      single_training_step: singleStep.value,
+      stop_at_value: stopAtValue.value,
+      render_grad: renderGrad.value
     }
     
     socket.send(JSON.stringify(message))
-  }
-
-  function sendInteger() {
-    sendTrainingControl({
-      cameraId: cameraId.value,
-      doTraining: true,
-      singleTrainingStep: false,
-      stopAtValue: -1,
-      renderGrad: false
-    })
   }
 
   function initWebGL(): boolean {
@@ -215,70 +312,74 @@ export function useTrainControl(canvas: Ref<HTMLCanvasElement | null>) {
 
   function initWebSocket() {
     try {
-      socket = new WebSocket('ws://localhost:8765/ws/training_control')
+      // Connect to port 6009 (network_gui)
+      socket = new WebSocket('ws://localhost:6009')
       socket.binaryType = 'arraybuffer'
 
       socket.onopen = () => {
-        console.log('Connected to WebSocket server.')
+        console.log('Connected to training server on port 6009')
         isConnected.value = true
         connectionError.value = null
-        sendInteger()
+        sendTrainingControl()
       }
 
       socket.onmessage = (event) => {
         if (!gl || !canvas.value) return
         
-        try {
-          // 尝试解析JSON消息（训练统计数据）
-          const message = JSON.parse(event.data)
-          if (message.type === 'training_stats') {
-            // 更新训练统计数据
-            trainingStats.value = {
-              iteration: message.iteration || 0,
-              num_gaussians: message.num_gaussians || 0,
-              loss: message.loss || 0,
-              sh_degree: message.sh_degree || 0
+        const buffer = event.data as ArrayBuffer
+        
+        // First, try to parse as image data (width + height + RGB)
+        if (buffer.byteLength >= 8) {
+          const view = new DataView(buffer)
+          const width = view.getInt32(0, true)
+          const height = view.getInt32(4, true)
+          
+          // Check if this looks like image data
+          const expectedImageSize = width * height * 3 + 8
+          if (buffer.byteLength >= expectedImageSize) {
+            // This is image data
+            if (canvas.value.width !== width || canvas.value.height !== height) {
+              const dpr = window.devicePixelRatio || 1
+              canvas.value.width = width * dpr
+              canvas.value.height = height * dpr
+              gl.viewport(0, 0, width * dpr, height * dpr)
             }
-            currentIteration.value = message.iteration || 0
+
+            const imageData = new Uint8Array(buffer, 8, width * height * 3)
+            gl.bindTexture(gl.TEXTURE_2D, texture)
+            gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, width, height, 0, gl.RGB, gl.UNSIGNED_BYTE, imageData)
+            drawScene()
+            
+            // Send next frame request
+            sendTrainingControl()
             return
           }
-        } catch (e) {
-          // 如果不是JSON，则处理为图像数据
+          
+          // Check if this is stats data (4 byte length + JSON)
+          if (buffer.byteLength >= 4) {
+            const jsonLength = view.getInt32(0, true)
+            if (buffer.byteLength >= 4 + jsonLength) {
+              try {
+                const jsonData = new Uint8Array(buffer, 4, jsonLength)
+                const jsonString = new TextDecoder().decode(jsonData)
+                const stats = JSON.parse(jsonString)
+                
+                // Update training statistics
+                trainingStats.value = {
+                  iteration: stats.iteration || 0,
+                  num_gaussians: stats.num_gaussians || 0,
+                  loss: stats.loss || 0,
+                  sh_degree: stats.sh_degree || 0,
+                  paused: stats.paused || false,
+                  train_params: stats.train_params || {}
+                }
+                currentIteration.value = stats.iteration || 0
+              } catch (e) {
+                console.warn('Failed to parse stats JSON:', e)
+              }
+            }
+          }
         }
-        
-        const buffer = event.data as ArrayBuffer
-        const view = new DataView(buffer)
-
-        const width = view.getInt32(0, true)
-        const height = view.getInt32(4, true)
-
-        if (canvas.value.width !== width || canvas.value.height !== height) {
-          const dpr = window.devicePixelRatio || 1
-          canvas.value.width = width * dpr
-          canvas.value.height = height * dpr
-          gl.viewport(0, 0, width * dpr, height * dpr)
-        }
-
-        const data = new Uint8Array(buffer, 8)
-        
-        if (data.byteLength !== width * height * 3) {
-          console.warn('Data size mismatch:', data.byteLength, 'expected:', width * height * 3)
-        }
-
-        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, width, height, 0, gl.RGB, gl.UNSIGNED_BYTE, data)
-        drawScene()
-        
-        // 发送当前训练控制状态
-        sendTrainingControl({
-          cameraId: cameraId.value,
-          doTraining: isTraining.value,
-          singleTrainingStep: singleStep.value,
-          stopAtValue: stopAtValue.value,
-          renderGrad: renderGrad.value
-        })
-        
-        // 重置单步标志
-        singleStep.value = false
       }
 
       socket.onerror = (error) => {
@@ -313,64 +414,52 @@ export function useTrainControl(canvas: Ref<HTMLCanvasElement | null>) {
 
   function updateCameraId(newId: number) {
     cameraId.value = newId
-    sendInteger()
+  }
+
+  function updateCameraParams(params: { fov?: number; yaw?: number; pitch?: number; distance?: number }) {
+    if (params.fov !== undefined) cameraFov.value = params.fov
+    if (params.yaw !== undefined) cameraYaw.value = params.yaw
+    if (params.pitch !== undefined) cameraPitch.value = params.pitch
+    if (params.distance !== undefined) cameraDistance.value = params.distance
+    
+    if (socket && isConnected.value) {
+      sendTrainingControl()
+    }
   }
 
   // 训练控制方法
   function pauseTraining() {
+    isTraining.value = false
     if (socket && isConnected.value) {
-      const message = {
-        type: 'control',
-        action: 'pause'
-      }
-      socket.send(JSON.stringify(message))
-      isTraining.value = false
+      sendTrainingControl()
     }
   }
 
   function resumeTraining() {
+    isTraining.value = true
     if (socket && isConnected.value) {
-      const message = {
-        type: 'control',
-        action: 'resume'
-      }
-      socket.send(JSON.stringify(message))
-      isTraining.value = true
+      sendTrainingControl()
     }
   }
 
   function singleStepTraining() {
+    singleStep.value = true
     if (socket && isConnected.value) {
-      const message = {
-        type: 'control',
-        action: 'single_step'
-      }
-      socket.send(JSON.stringify(message))
-      singleStep.value = true
+      sendTrainingControl()
     }
   }
 
   function updateStopValue(value: number) {
     stopAtValue.value = value
     if (socket && isConnected.value) {
-      const message = {
-        type: 'control',
-        action: 'set_stop_iteration',
-        value: value
-      }
-      socket.send(JSON.stringify(message))
+      sendTrainingControl()
     }
   }
 
   function toggleRenderGrad(enabled: boolean) {
     renderGrad.value = enabled
     if (socket && isConnected.value) {
-      const message = {
-        type: 'control',
-        action: 'render_grad',
-        value: enabled
-      }
-      socket.send(JSON.stringify(message))
+      sendTrainingControl()
     }
   }
 
@@ -382,6 +471,13 @@ export function useTrainControl(canvas: Ref<HTMLCanvasElement | null>) {
     connect,
     disconnect,
     updateCameraId,
+    
+    // 相机参数
+    cameraFov,
+    cameraYaw,
+    cameraPitch,
+    cameraDistance,
+    updateCameraParams,
     
     // 训练状态
     isTraining,

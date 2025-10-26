@@ -1,24 +1,20 @@
 .video-upload-container {
-  padding: 16px;
   background: transparent;
 }
-
 .upload-title {
   display: flex;
   align-items: center;
-  margin-bottom: 12px;
-  font-size: 18px;
+  font-size: 2rem;
   font-weight: 600;
+  margin-left: 1.6rem;
   color: #ffffff;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
-
-.upload-title-icon {
+.upload-title :deep(.el-icon) {
   margin-right: 8px;
-  color: #E6A23C;
+  color: #fff;
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
 }
-
 .username-tag {
   margin-left: 10px;
 }
@@ -32,129 +28,167 @@
   box-shadow: 
     0 8px 32px rgba(0, 0, 0, 0.1),
     inset 0 1px 0 rgba(255, 255, 255, 0.2);
-  border: 1px solid rgba(255, 255, 255, 0.15);
 }
 
-/* 帧率提取配置区域 - 毛玻璃效果 */
-.frame-extraction-config {
-  margin: 20px 0;
-  padding: 20px;
-  background: rgba(230, 162, 60, 0.08);
+.frame-extraction {
+  margin:  0 0 20px 0;
+  padding: 20px; 
+  background: rgba(255, 255, 255, 0.05);
   border-radius: 12px;
   border: 1px solid rgba(230, 162, 60, 0.15);
   -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
-  box-shadow: 
-    0 4px 16px rgba(230, 162, 60, 0.1),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
-.frame-extraction-config .config-title {
-  color: #E6A23C;
+ .config-title {
+  color: #eeedec;
+  font-size: 2rem;
   font-weight: 600;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
-.frame-extraction-config .config-content {
-  margin-top: 16px;
-}
-
-.frame-extraction-config .config-item {
-  margin-bottom: 16px;
-}
-
-.frame-extraction-config .config-label {
-  display: block;
-  margin-bottom: 8px;
+.config-label {
+  font-size: 1.6rem;
   color: rgba(255, 255, 255, 0.9);
-  font-weight: 500;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
-.form-tip {
-  display: block;
-  margin-top: 8px;
-  font-size: 12px;
-  line-height: 1.4;
-  color: rgba(255, 255, 255, 0.7);
+.config-item :deep(.el-slider__runway) {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 6px;
+  height: 8px;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-/* 滑块样式 - 毛玻璃效果 */
-.frame-extraction-config :deep(.el-slider__runway) {
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 4px;
-}
-
-.frame-extraction-config :deep(.el-slider__bar) {
-  background: linear-gradient(90deg, #E6A23C, #f0b90b);
-  border-radius: 4px;
-}
-
-.frame-extraction-config :deep(.el-slider__button) {
-  border-color: #E6A23C;
+.config-item :deep(.el-slider__button) {
   background: rgba(255, 255, 255, 0.9);
-  box-shadow: 0 2px 8px rgba(230, 162, 60, 0.3);
+  border: 2px solid rgba(230, 162, 60, 0.8);
+  box-shadow: 
+    0 4px 12px rgba(0, 0, 0, 0.15),
+    0 2px 6px rgba(230, 162, 60, 0.2);
+  transition: all 0.3s ease;
 }
 
-.frame-extraction-config :deep(.el-slider__button:hover) {
-  border-color: #d4941a;
-  box-shadow: 0 4px 12px rgba(230, 162, 60, 0.4);
+.config-item :deep(.el-slider__button:hover) {
+  background: rgba(255, 255, 255, 1);
+  border-color: #E6A23C;
+  transform: scale(1.1);
 }
+
+.config-item :deep(.el-input-number) {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  width: 8rem;
+  height: 3rem;
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  box-shadow: 
+    0 4px 12px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.config-item :deep( .el-input__wrapper) {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  box-shadow: none;
+  transition: all 0.3s ease;
+}
+
+.config-item :deep(.el-input__wrapper:hover) {
+  border-color: rgba(230, 162, 60, 0.5);
+}
+
+.config-item :deep(.el-input__wrapper.is-focus) {
+  border-color: #9e763a;
+  box-shadow: 0 0 0 2px rgba(230, 162, 60, 0.2);
+}
+
+.config-item :deep(.el-input__inner) {
+  background: rgba(0, 0, 0, 0.08); 
+  border: none;                  
+  box-shadow: none;              
+  color: #ffffff ;             
+  font-weight: 500;
+  font-size: 2rem;
+  text-shadow: 0 1px 2px rgba(243, 243, 243, 0.2);
+}
+
+.config-item :deep( .el-input-number__increase),
+.config-item :deep( .el-input-number__decrease) {
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.7);
+  border: none;
+  transition: all 0.3s ease;
+}
+
+.config-item :deep( .el-input-number__increase:hover),
+.config-item :deep( .el-input-number__decrease:hover) {
+  background: rgba(255, 153, 0, 0.3);
+  color: rgba(243, 239, 239, 0.9);
+}
+  
 
 /* 复选框样式 */
-.frame-extraction-config :deep(.el-checkbox__input.is-checked .el-checkbox__inner) {
+.config-item :deep(.el-checkbox__input.is-checked) {
   background-color: #E6A23C;
   border-color: #E6A23C;
   box-shadow: 0 2px 4px rgba(230, 162, 60, 0.3);
 }
 
-.frame-extraction-config :deep(.el-checkbox__label) {
+.config-item :deep(.el-checkbox__inner) {
+  width: 1.6rem;
+  height: 1.6rem;
+  border-radius: 4px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.1);
+  transition: all 0.3s ease;
+}
+
+.config-item :deep(.el-checkbox__inner::after) {
+  width: 5px;
+  height: 9px;
+  left: 5px;
+  top: 1px;
+  border-width: 2px;
+}
+
+.config-item :deep(.el-checkbox__label) {
   color: rgba(255, 255, 255, 0.9);
+  font-size: 1.6rem;
+  margin-left: 8px;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 /* 卡片样式 - 毛玻璃效果 */
-.upload-area,
-.file-list-card,
-.folder-config {
+.upload-area{
   background: rgba(255, 255, 255, 0.08);
   border-radius: 12px;
-  -webkit-backdrop-filter: blur(15px);
-  backdrop-filter: blur(15px);
-  box-shadow: 
-    0 4px 16px rgba(0, 0, 0, 0.1),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  border: none;
   margin-bottom: 16px;
-}
-
-.upload-area :deep(.el-card__header),
-.file-list-card :deep(.el-card__header),
-.folder-config :deep(.el-card__header) {
-  background: rgba(255, 255, 255, 0.05);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  color: rgba(255, 255, 255, 0.9);
-  font-weight: 600;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 .upload-actions {
   display: flex;
-  gap: 12px;
   margin-top: 20px;
   align-items: center;
 }
 
-.upload-folder-input {
-  flex: 1;
+.folder-reset{
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  margin-bottom: 16px;
 }
+.folder-reset :deep(.el-input__inner) {
+  font-size: 1.5rem;
+}
+.folder-reset :deep(.el-input){
+  height: 3rem;
 
-.upload-submit-btn {
-  min-width: 140px;
 }
 
 .upload-button {
-  background: linear-gradient(135deg, #E6A23C, #f0b90b);
+  background: linear-gradient(135deg, #c5c0b9, #1a1710);
   border: none;
   border-radius: 8px;
   box-shadow: 
@@ -170,15 +204,19 @@
     inset 0 1px 0 rgba(255, 255, 255, 0.2);
 }
 
-.video-file-list {
-  margin-top: 20px;
-  max-height: 400px;
-  overflow-y: auto;
-}
-
-.file-list {
+.file-list-card {
   max-height: 300px;
   overflow-y: auto;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 16px;
+  -webkit-backdrop-filter: blur(15px);
+  backdrop-filter: blur(15px);
+  box-shadow: 
+    0 4px 16px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  margin-top: 8px;
 }
 
 .file-item {
@@ -186,29 +224,38 @@
   justify-content: space-between;
   align-items: center;
   padding: 16px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 10px;
   margin-bottom: 12px;
   cursor: pointer;
   transition: all 0.3s ease;
-  background: rgba(255, 255, 255, 0.05);
-  -webkit-backdrop-filter: blur(10px);
-  backdrop-filter: blur(10px);
+  background: rgba(255, 255, 255, 0.08);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  box-shadow: 
+    0 2px 8px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
 }
 
 .file-item:hover {
-  border-color: rgba(230, 162, 60, 0.5);
-  background: rgba(230, 162, 60, 0.1);
+  border-color: rgba(230, 162, 60, 0.6);
+  background: rgba(230, 162, 60, 0.12);
   transform: translateY(-2px);
-  box-shadow: 0 4px 16px rgba(230, 162, 60, 0.2);
+  box-shadow: 
+    0 6px 20px rgba(230, 162, 60, 0.25),
+    0 2px 8px rgba(0, 0, 0, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
 }
 
 .file-item.selected {
-  border-color: #E6A23C;
-  background: rgba(230, 162, 60, 0.15);
+  border-color: rgba(230, 162, 60, 0.8);
+  background: rgba(230, 162, 60, 0.18);
   box-shadow: 
-    0 4px 16px rgba(230, 162, 60, 0.3),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    0 6px 24px rgba(230, 162, 60, 0.35),
+    0 2px 8px rgba(0, 0, 0, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.25),
+    inset 0 0 20px rgba(230, 162, 60, 0.1);
+  transform: translateY(-1px);
 }
 
 .file-content {
@@ -230,7 +277,6 @@
   flex: 1;
   min-width: 0;
 }
-
 .file-name {
   font-weight: 500;
   color: rgba(255, 255, 255, 0.9);
@@ -249,7 +295,7 @@
 
 .file-type {
   font-size: 12px;
-  color: #E6A23C;
+  color: #e6e4e3;
   background: rgba(230, 162, 60, 0.2);
   padding: 2px 6px;
   border-radius: 4px;
@@ -257,7 +303,7 @@
 }
 
 .file-size {
-  font-size: 12px;
+  font-size: 1rem;
   color: rgba(255, 255, 255, 0.7);
   white-space: nowrap;
 }
@@ -306,7 +352,7 @@
 }
 
 /* 上传区域样式覆盖 - 毛玻璃效果 */
-.upload-section :deep(.el-upload-dragger) {
+.upload-area :deep(.el-upload-dragger) {
   background: rgba(255, 255, 255, 0.05);
   border: 2px dashed rgba(255, 255, 255, 0.2);
   border-radius: 12px;
@@ -315,58 +361,30 @@
   backdrop-filter: blur(10px);
 }
 
-.upload-section :deep(.el-upload-dragger:hover) {
-  border-color: rgba(230, 162, 60, 0.6);
+
+
+.upload-area :deep(.el-upload-dragger:hover) {
+  border-color: rgba(56, 52, 46, 0.6);
   background: rgba(230, 162, 60, 0.08);
   box-shadow: 0 4px 16px rgba(230, 162, 60, 0.2);
 }
 
-.upload-section :deep(.el-upload__text) {
+.upload-area :deep(.el-upload__text) {
   color: rgba(255, 255, 255, 0.8);
-  font-size: 14px;
+  font-size: 2.5rem;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
-.upload-section :deep(.el-upload__tip) {
-  color: rgba(255, 255, 255, 0.6);
-  font-size: 12px;
-  margin-top: 8px;
+.file-list-header{
+  font-size: 1.5rem;
 }
 
-.upload-section :deep(.el-icon--upload) {
+.upload-area :deep(.el-icon--upload) {
   color: #E6A23C;
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
 }
 
-/* 输入框样式 - 毛玻璃效果 */
-.folder-config :deep(.el-input__wrapper) {
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 8px;
-  -webkit-backdrop-filter: blur(10px);
-  backdrop-filter: blur(10px);
-  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
-}
 
-.folder-config :deep(.el-input__wrapper:hover) {
-  border-color: rgba(230, 162, 60, 0.5);
-}
-
-.folder-config :deep(.el-input__wrapper.is-focus) {
-  border-color: #E6A23C;
-  box-shadow: 
-    inset 0 1px 3px rgba(0, 0, 0, 0.1),
-    0 0 0 2px rgba(230, 162, 60, 0.2);
-}
-
-.folder-config :deep(.el-input__inner) {
-  color: rgba(255, 255, 255, 0.9);
-  background: transparent;
-}
-
-.folder-config :deep(.el-input__inner::placeholder) {
-  color: rgba(255, 255, 255, 0.5);
-}
 
 /* 响应式调整 */
 @media (max-width: 768px) {
@@ -379,10 +397,6 @@
     width: 100%;
   }
   
-  .upload-submit-btn {
-    width: 100%;
-    min-width: auto;
-  }
   
   .frame-extraction-config {
     padding: 16px;

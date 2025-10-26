@@ -26,6 +26,22 @@ export default defineConfig({
       '@': fileURLToPath(new URL('./src', import.meta.url)),
     },
   },
+  optimizeDeps: {
+    include: ['playcanvas', '@playcanvas/pcui'],
+    exclude: [],
+    esbuildOptions: {
+      target: 'esnext',
+      supported: {
+        'top-level-await': true
+      }
+    }
+  },
+  build: {
+    target: 'esnext',
+    commonjsOptions: {
+      transformMixedEsModules: true
+    }
+  },
   css: {
     preprocessorOptions: {
       scss: {
