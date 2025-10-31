@@ -75,9 +75,9 @@
   </div>
 </template>
 
-<script setup lang="ts">
+<script setup lang="ts" name="TrainControlView">
 import { ref, onMounted, onUnmounted, provide, watch } from 'vue'
-import { useTrainControl } from '@/composables/useTrainControl'
+import { useTrainControl } from '@/composables/useControl/useTrainControl'
 import CameraControl from './components/CameraControl.vue'
 import TrainingWidget from './components/TrainingWidget.vue'
 import RenderWidget from './components/RenderWidget.vue'
@@ -117,7 +117,7 @@ interface CameraParams {
 
 // Handle camera parameter updates
 function handleCameraUpdate(params: CameraParams) {
-  console.log('Camera parameters updated:', params)
+  // console.log('Camera parameters updated:', params)
   // Update camera parameters in train control
   if (params.fov) {
     updateCameraParams({ fov: params.fov })

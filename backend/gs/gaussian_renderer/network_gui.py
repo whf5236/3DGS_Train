@@ -13,6 +13,8 @@ import torch
 import json
 import traceback
 from scene.cameras import CustomCam
+import psutil
+import platform
 
 host = "127.0.0.1"
 port = 6009
@@ -36,6 +38,66 @@ latest_width = 0
 latest_height = 0
 latest_image_bytes = bytes([])
 latest_stats = {}
+
+def get_device_info():
+    """获取设备信息"""
+    device_info = {
+        'name': 'Unknown GPU',
+        'capability': 'Unknown',
+        'driver': 'Unknown',
+        'cudaVersion': 'Unknown',
+        'clockRate': 'Unknown',
+        'temperature': 0,
+        'memoryUsed': 0,
+        'memoryTotal': 0
+    }
+    
+    try:
+        if torch.cuda.is_available():
+            device = torch.cuda.current_device()
+            device_props = torch.cuda.get_device_properties(device)
+            
+            # 基本设备信息
+            device_info['name'] = device_props.name
+            device_info['capability'] = f"{device_props.major}.{device_props.minor}"
+            device_info['memoryTotal'] = device_props.total_memory // (1024 * 1024)  # MB
+            
+            # 内存使用情况
+            memory_allocated = torch.cuda.memory_allocated(device) // (1024 * 1024)  # MB
+            device_info['memoryUsed'] = memory_allocated
+            
+            # CUDA 版本
+            device_info['cudaVersion'] = torch.version.cuda or 'Unknown'
+            
+            # 时钟频率 (kHz to MHz)
+            if hasattr(device_props, 'clock_rate'):
+                device_info['clockRate'] = f"{device_props.clock_rate // 1000} MHz"
+            
+            # 尝试获取温度（这个可能不总是可用）
+            try:
+                import pynvml
+                pynvml.nvmlInit()
+                handle = pynvml.nvmlDeviceGetHandleByIndex(device)
+                temp = pynvml.nvmlDeviceGetTemperature(handle, pynvml.NVML_TEMPERATURE_GPU)
+                device_info['temperature'] = temp
+                
+                # 获取驱动版本
+                driver_version = pynvml.nvmlSystemGetDriverVersion()
+                device_info['driver'] = driver_version.decode('utf-8') if isinstance(driver_version, bytes) else str(driver_version)
+                
+            except ImportError:
+                # pynvml 不可用，使用默认值
+                device_info['temperature'] = 45  # 默认温度
+                device_info['driver'] = 'Unknown'
+            except Exception as e:
+                print(f"Error getting GPU temperature/driver: {e}")
+                device_info['temperature'] = 45
+                device_info['driver'] = 'Unknown'
+                
+    except Exception as e:
+        print(f"Error getting device info: {e}")
+    
+    return device_info
 
 async def handle_client(websocket, path):
     """Handle WebSocket client connection"""
@@ -70,6 +132,20 @@ async def handle_client(websocket, path):
                             stats_json = json.dumps(latest_stats).encode('utf-8')
                             stats_header = struct.pack('i', len(stats_json))
                             await websocket.send(stats_header + stats_json)
+                    
+                    # Send device info periodically (every 10th message to avoid spam)
+                    if not hasattr(handle_client, 'device_info_counter'):
+                        handle_client.device_info_counter = 0
+                    handle_client.device_info_counter += 1
+                    
+                    if handle_client.device_info_counter % 10 == 1:  # Send device info every 10 messages
+                        device_info = get_device_info()
+                        device_json = json.dumps({
+                            'type': 'device_info',
+                            'data': device_info
+                        }).encode('utf-8')
+                        device_header = struct.pack('i', len(device_json))
+                        await websocket.send(device_header + device_json)
                             
             except json.JSONDecodeError as e:
                 print(f"JSON decode error: {e}")

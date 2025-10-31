@@ -202,7 +202,7 @@ watch(
       renderAlpha: renderAlpha.value,
       renderDepth: renderDepth.value,
       invertColors: invertColors.value,
-      colormap: selectedColormap.value.value
+      colormap: selectedColormap.value?.value || null
     })
   },
   { deep: true, immediate: true }

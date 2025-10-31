@@ -274,7 +274,8 @@
 
 <script setup lang="ts">
 import { ref, reactive, computed, watch, onMounted, onUnmounted } from 'vue'
-import { Math3D, type Matrix4 } from '@/utils/math3d'
+import {Math3D} from '@/utils/math3d'
+import type { Pose, Vector3, Matrix4, CameraParams} from '@/utils/Control'
 // Props
 interface Props {
   canvas?: HTMLCanvasElement | null
@@ -288,27 +289,6 @@ const props = withDefaults(defineProps<Props>(), {
 const emit = defineEmits<{
   cameraUpdate: [params: CameraParams]
 }>()
-
-// Types
-interface Vector3 {
-  x: number
-  y: number
-  z: number
-}
-
-interface Pose {
-  yaw: number
-  pitch: number
-}
-
-interface CameraParams {
-  fov: number
-  pose: Pose
-  cameraMatrix: number[][]
-  lookatPoint: Vector3
-  upVector: Vector3
-  cameraMode: string
-}
 
 // Reactive data
 const cameraMode = ref<'orbit' | 'wasd'>('wasd')
@@ -327,7 +307,7 @@ const invertY = ref(false)
 // Camera parameters
 const fov = ref(60)
 const radius = ref(1)
-const pose = reactive<Pose>({ yaw: Math.PI, pitch: 0 })
+const pose = reactive<Pose>({ yaw: Math.PI, pitch: 0, row: 0 })
 const upVector = reactive<Vector3>({ x: 0, y: -1, z: 0 })
 const lookatPoint = reactive<Vector3>({ x: 0, y: 0, z: 0 })
 const cameraPos = reactive<Vector3>({ x: 0, y: 0, z: -1 })

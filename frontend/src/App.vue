@@ -1,6 +1,6 @@
 <script setup lang="ts" name="App">
-import AppLayout from '@/layouts/AppLayout.vue'
-import ParticleBackground from '@/layouts/ParticleBackground.vue'
+import AppLayout from '@/conponents/AppLayout.vue'
+import ParticleBackground from '@/conponents/ParticleBackground.vue'
 
 </script>
 <template>

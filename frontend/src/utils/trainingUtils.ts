@@ -14,9 +14,6 @@ export class TrainingUtils {
     })
   }
 
-  /**
-   * 格式化持续时间
-   */
   static formatDuration(seconds: number): string {
     if (seconds < 60) {
       return `${Math.round(seconds)}秒`
@@ -31,9 +28,7 @@ export class TrainingUtils {
     }
   }
 
-  /**
-   * 验证文件夹选择
-   */
+
   static validateFolderSelection(folderDetails: any): { isValid: boolean; error?: string } {
     if (!folderDetails) {
       return {

@@ -785,7 +785,6 @@ import { eventBus } from '@/utils/eventBus';
 import { useTrainingStore } from '@/stores/trainingStore';
 import { useTrainingComponent } from '@/composables/useTrainingComponent';
 import { useWebSocketConnection } from '@/composables/useWebSocket';
-import { TrainingUtils } from '@/utils/trainingUtils';
 import {  ElCard, ElTag, } from 'element-plus';
 import { Delete, QuestionFilled, VideoPlay, VideoPause, RefreshLeft, 
   SwitchButton, View, Refresh, Clock,FolderOpened,Folder,Box,Setting

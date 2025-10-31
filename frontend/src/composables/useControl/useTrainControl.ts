@@ -1,6 +1,28 @@
 import { ref, type Ref } from 'vue'
 import type { ProgramInfo, Buffers } from '@/types/webgl'
 
+export interface TrainControlState {
+  isTraining: boolean
+  currentIteration: number
+  stopAtValue: number
+  renderGrad: boolean
+  iteration: number
+  num_gaussians: number
+  loss: number
+  sh_degree: number
+  paused: boolean
+  train_params: Record<string, any>
+}
+export interface DeviceInfo {
+    name: string
+    capability: string
+    driver: string
+    cudaVersion: string
+    clockRate: string
+    temperature: number
+    memoryUsed: number
+    memoryTotal: number
+}
 export function useTrainControl(canvas: Ref<HTMLCanvasElement | null>) {
   const cameraId = ref<number>(0)
   const isConnected = ref<boolean>(false)
@@ -11,23 +33,32 @@ export function useTrainControl(canvas: Ref<HTMLCanvasElement | null>) {
   const currentIteration = ref<number>(0)
   const stopAtValue = ref<number>(-1)
   const renderGrad = ref<boolean>(false)
-  const singleStep = ref<boolean>(false)
+  const singleStep = ref(false)
   
   // 训练统计数据
-  const trainingStats = ref<{
-    iteration: number
-    num_gaussians: number
-    loss: number
-    sh_degree: number
-    paused: boolean
-    train_params: Record<string, any>
-  }>({
+  const trainingStats = ref<TrainControlState>({
+    isTraining: true,
+    currentIteration: 0,
+    stopAtValue: -1,
+    renderGrad: false,
     iteration: 0,
     num_gaussians: 0,
     loss: 0,
     sh_degree: 0,
     paused: false,
     train_params: {}
+  })
+
+  // 设备信息
+  const deviceInfo = ref<DeviceInfo>({
+    name: 'Unknown GPU',
+    capability: 'Unknown',
+    driver: 'Unknown',
+    cudaVersion: 'Unknown',
+    clockRate: 'Unknown',
+    temperature: 0,
+    memoryUsed: 0,
+    memoryTotal: 0
   })
 
   // Camera parameters
@@ -366,11 +397,14 @@ export function useTrainControl(canvas: Ref<HTMLCanvasElement | null>) {
                 
                 // Update training statistics
                 trainingStats.value = {
-                  iteration: stats.iteration || 0,
-                  num_gaussians: stats.num_gaussians || 0,
-                  loss: stats.loss || 0,
-                  sh_degree: stats.sh_degree || 0,
-                  paused: stats.paused || false,
+                  isTraining: Boolean(stats.isTraining) || true,
+                  currentIteration: Number(stats.currentIteration || 0),
+                  stopAtValue: Number(stats.stop_at_value || 0),
+                  renderGrad: Boolean(stats.render_grad || false),
+                  num_gaussians: Number(stats.num_gaussians || 0),
+                  loss: Number(stats.loss || 0),
+                  sh_degree: Number(stats.sh_degree || 0),
+                  paused: Boolean(stats.paused || false),
                   train_params: stats.train_params || {}
                 }
                 currentIteration.value = stats.iteration || 0

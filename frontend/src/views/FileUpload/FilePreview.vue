@@ -177,36 +177,6 @@
         </div>
       </div>
 
-      <!-- 其他文件类型 -->
-      <div v-else-if="!isImage && !isVideo" class="other-file-preview">
-        <el-result icon="info" :title="selectedFile.filename">
-          <template #icon>
-            <el-icon class="file-type-icon"><Document /></el-icon>
-          </template>
-          <template #sub-title>
-            <span>此文件类型无法预览</span> 
-          </template>
-          <template #extra>
-            <el-button type="primary" @click="openInNewTab">
-              <el-icon><TopRight /></el-icon> 在新标签页中打开
-            </el-button>
-            <el-button type="success" @click="downloadFile">
-              <el-icon><Download /></el-icon> 下载
-            </el-button>
-          </template>
-        </el-result>
-        
-        <!-- 其他文件信息 -->
-        <el-descriptions
-          :column="1"
-          class="file-info glass-descriptions"
-          title="文件信息"
-        >
-          <el-descriptions-item label="文件名称">{{ selectedFile.filename }}</el-descriptions-item>
-          <el-descriptions-item label="文件类型">{{ selectedFile.type.toUpperCase() }}</el-descriptions-item>
-          <el-descriptions-item label="文件大小">{{ formatFileSize(selectedFile.size) }}</el-descriptions-item>
-        </el-descriptions>
-      </div>
     </div>
 
     <!-- 图片导航按钮 -->
@@ -267,8 +237,7 @@
 
 <script setup lang="ts" name="Preview">
 import { ref, computed, watch } from 'vue'
-import { ElMessage,ElCard,ElDescriptions,
-  ElDescriptionsItem,ElTag,
+import { ElMessage,ElCard,ElTag,
   ElSlider,ElButton,ElResult,
   ElSkeleton,ElEmpty,ElRadioGroup,
   ElRadioButton,ElIcon } from 'element-plus'
@@ -276,8 +245,6 @@ import {
   View,
   Document,
   RefreshRight,
-  Download,
-  TopRight,
   ZoomIn,
   ZoomOut,
   ArrowLeft,
@@ -354,7 +321,7 @@ const {
   hasNextImage,
   
   // Methods
-  formatFileSize,
+
   retryLoad,
   handleImageError,
   handleVideoError,
@@ -362,8 +329,7 @@ const {
   decreaseZoom,
   resetZoom,
   handleWheel,
-  openInNewTab,
-  downloadFile,
+
   startDrag,
   prevImage,
   nextImage
@@ -374,7 +340,6 @@ const userStore = useUserStore()
 const activeTab = ref<'video' | 'frames'>('video')
 const loadingFrames = ref(false)
 const frameError = ref('')
-const videoInfo = ref<VideoInfo | null>(null)
 const frames = ref<FrameItem[]>([])
 const extractionInfo = ref<ExtractionInfo | null>(null)
 const currentFrameIndex = ref(0)
@@ -394,7 +359,6 @@ watch(
     if(!newFile) return
     if (isVideo.value) {
     activeTab.value = 'video'
-    await loadVideoInfo()
     await loadFrames()
   } else {
     resetVideoData()
@@ -403,7 +367,6 @@ watch(
 
 // 方法
 const resetVideoData = () => {
-  videoInfo.value = null
   frames.value = []
   extractionInfo.value = null
   currentFrameIndex.value = 0
@@ -411,19 +374,7 @@ const resetVideoData = () => {
   frameZoomLevel.value = 1
 }
 
-const loadVideoInfo = async () => {
-  if (!props.selectedFile || !isVideo.value) return
-  
-  try {
-    const username = userStore.user?.username || 'current_user'
-    const response = await api.get(`/upload/video_info/${props.selectedFile.filename}`, {
-      params: { username }
-    })
-    videoInfo.value = response.data.info
-  } catch (error) {
-    console.error('加载视频信息失败:', error)
-  }
-}
+
 
 const loadFrames = async () => {
   if (!props.selectedFile || !isVideo.value) return
@@ -520,20 +471,8 @@ const handleFrameError = () => {
   ElMessage.error('帧图片加载失败')
 }
 
-const formatDuration = (seconds: number): string => {
-  const hours = Math.floor(seconds / 3600)
-  const minutes = Math.floor((seconds % 3600) / 60)
-  const secs = Math.floor(seconds % 60)
-  
-  if (hours > 0) {
-    return `${hours}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
-  }
-  return `${minutes}:${secs.toString().padStart(2, '0')}`
-}
 
-const formatDateTime = (isoString: string): string => {
-  return new Date(isoString).toLocaleString('zh-CN')
-}
+
 </script>
 
 <style scoped src="../../asset/upload/filePreview.css">

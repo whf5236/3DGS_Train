@@ -93,7 +93,7 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 
 // 响应式数据
-const fpsLimit = ref(180)
+const fpsLimit = ref(0)
 const useVsync = ref(false)
 const currentGuiFps = ref(0)
 const currentRenderFps = ref(0)
@@ -106,14 +106,14 @@ const renderFpsHistory = ref<number[]>(new Array(100).fill(0))
 
 // 设备信息
 const deviceInfo = ref({
-  name: 'NVIDIA GeForce RTX 4090',
-  capability: '8.9',
-  driver: '536.23',
-  cudaVersion: '12.1',
-  clockRate: '2520 MHz',
-  temperature: 45,
-  memoryUsed: 2048, // MB
-  memoryTotal: 24576 // MB
+  name: 'NaN',
+  capability: 'NaN',
+  driver: '',
+  cudaVersion: '',
+  clockRate: '',
+  temperature: 0,
+  memoryUsed: 0, // MB
+  memoryTotal: 0 // MB
 })
 
 // 计算属性
@@ -128,8 +128,9 @@ let deviceUpdateTimer: number | null = null
 // 方法
 function updateFpsData() {
   // 模拟FPS数据更新
-  const newGuiFps = 60 + Math.random() * 20 - 10
-  const newRenderFps = 45 + Math.random() * 15 - 7.5
+  const newGuiFps = 60 
+  const newRenderFps = 45 
+  // fps这里需要从后端获取
   
   currentGuiFps.value = newGuiFps
   currentRenderFps.value = newRenderFps
@@ -147,8 +148,9 @@ function updateFpsData() {
 
 function updateDeviceInfo() {
   // 模拟设备信息更新
-  deviceInfo.value.temperature = 45 + Math.random() * 20
-  deviceInfo.value.memoryUsed = 2048 + Math.random() * 1024
+  // deviceInfo.value.temperature = 45 + Math.random() * 20
+  // deviceInfo.value.memoryUsed = 2048 + Math.random() * 1024
+  // 这里不对啊，应该是后端发送的
 }
 
 function drawFpsChart() {

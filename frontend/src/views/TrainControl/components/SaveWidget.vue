@@ -75,8 +75,8 @@ interface SaveStatus {
 }
 
 // 响应式数据
-const screenshotPath = ref('_screenshots')
-const plyPath = ref('_ply_files')
+const screenshotPath = ref('')
+const plyPath = ref('')
 const saving = ref(false)
 const hasImage = ref(true) // 假设有图像可用
 const saveStatus = ref<SaveStatus | null>(null)

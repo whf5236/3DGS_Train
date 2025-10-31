@@ -17,8 +17,8 @@ export interface FileItem {
   created_time: number
   item_type: 'file'
   extension?: string
-  category?: 'image' | 'video' | 'archive' | 'pointcloud' | 'other'  // 文件分类
-  stage?: string  // 所属阶段
+  category?: 'image' | 'video' | 'archive' | 'pointcloud' | 'other'  
+  stage?: string  
 }
 
 export interface FolderItem {

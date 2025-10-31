@@ -60,7 +60,8 @@
           
             <el-menu-item-group>
               <el-menu-item index="3-1">
-                哈哈哈
+                <el-icon><Setting /></el-icon>
+                训练控制
               </el-menu-item>
               <el-menu-item index="3-2">
                 <el-icon><Edit /></el-icon>
@@ -95,13 +96,14 @@ import {
    Setting, Box, Edit } from '@element-plus/icons-vue'
 import { ElContainer, ElAside, ElMain, ElMenu, ElMenuItem, 
   ElMenuItemGroup,ElIcon, ElSubMenu, ElScrollbar,  } from 'element-plus'
-import ImageUpload from '../conponents/FileUpload/ImageUpload.vue'
-import VideoUpload from '../conponents/FileUpload/VideoUpload.vue'
-import FolderUpload from '../conponents/FileUpload/FolderUpload.vue'
-import SplatUpload from '../conponents/FileUpload/SplatUpload.vue'
-import PointCloudProcessor from '../conponents/Progress/PointCloudProcessor.vue'
-import TrainingComponent from '../conponents/Progress/TrainingComponent.vue'
-import SplatEditorWrapper from '../conponents/SplatEditor/SplatEditorWrapper.vue'
+import ImageUpload from './FileUpload/ImageUpload.vue'
+import VideoUpload from './FileUpload/VideoUpload.vue'
+import FolderUpload from './FileUpload/FolderUpload.vue'
+import SplatUpload from './FileUpload/SplatUpload.vue'
+import PointCloudProcessor from './Progress/PointCloudProcessor.vue'
+import TrainingComponent from './Progress/TrainingComponent.vue'
+import SplatEditorWrapper from './SplatEditor/SplatEditorWrapper.vue'
+import TrainControlView from './TrainControl/TrainControlView.vue'
 
 const activeIndex = ref('1-1')
 
@@ -140,6 +142,8 @@ const mainComponent = computed(() => {
   }
   if (idx.startsWith('3-')) {
     switch (idx) {
+      case '3-1':
+        return markRaw(TrainControlView)
       case '3-2':
         return markRaw(SplatEditorWrapper)
       default:

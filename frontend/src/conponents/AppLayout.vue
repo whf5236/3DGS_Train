@@ -73,5 +73,5 @@ const logout = () => {
 </script>
 
 
-<style scoped src="./AppLayout.css">
+<style scoped src="../asset/AppLayout.css">
 </style>

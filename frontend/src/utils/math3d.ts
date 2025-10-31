@@ -1,14 +1,5 @@
-// 3D数学工具库，用于相机控制计算
+import type { Matrix4, Vector3 } from "./Control"
 
-export interface Vector3 {
-  x: number
-  y: number
-  z: number
-}
-
-export interface Matrix4 {
-  elements: number[] // 16个元素，按列主序存储
-}
 
 export class Math3D {
   // 创建单位矩阵

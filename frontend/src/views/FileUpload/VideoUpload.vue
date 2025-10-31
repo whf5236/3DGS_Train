@@ -141,34 +141,6 @@
         />
       </el-col>
     </el-row>
-
-    <!-- 上传进度显示 -->
-    <el-card v-if="uploadProgress.show" class="progress-card" shadow="hover">
-      <template #header>
-        <div class="progress-header">
-          <span>处理进度</span>
-          <el-tag :type="uploadProgress.status === 'success' ? 'success' : 'primary'">
-            {{ uploadProgress.completed }}/{{ uploadProgress.total }}
-          </el-tag>
-        </div>
-      </template>
-      
-      <el-progress
-        :percentage="uploadProgress.percentage"
-        :status="uploadProgress.status === 'success' ? 'success' : uploadProgress.status === 'exception' ? 'exception' : undefined"
-        :stroke-width="8"
-      />
-      
-      <div class="progress-details" style="margin-top: 10px;">
-        <p><strong>目标文件夹:</strong> {{ uploadProgress.targetFolder }}</p>
-        <p v-if="uploadProgress.currentFile">
-          <strong>当前处理:</strong> {{ uploadProgress.currentFile }}
-        </p>
-        <p v-if="uploadProgress.frameExtractionStatus">
-          <strong>帧提取状态:</strong> {{ uploadProgress.frameExtractionStatus }}
-        </p>
-      </div>
-    </el-card>
   </div>
 </template>
 
@@ -192,7 +164,6 @@ const {
   extractAllFrames,
   folderName,
   uploading,
-  uploadProgress,
   previewFileList,
   uploadFiles,
   removeFile,
@@ -204,11 +175,13 @@ const {
   getFileExtension,
   formatFileSize,
   setStage,
+  uploadConfig,
 } = FileUpload()
 
 // 设置当前组件类型
 onMounted(() => {
   setStage('images')
+  uploadConfig.fileType = 'video' // 初始化为视频类型
 })
 </script>
 

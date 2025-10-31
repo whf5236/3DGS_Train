@@ -80,16 +80,16 @@ export function FileUpload() {
   })
   
   // 上传进度
-  const uploadProgress = reactive<UploadProgress>({
-    show: false,
-    percentage: 0,
-    completed: 0,
-    total: 0,
-    status: '',
-    targetFolder: '',
-    currentFile: '',
-    frameExtractionStatus: ''
-  })
+  // const uploadProgress = reactive<UploadProgress>({
+  //   show: false,
+  //   percentage: 0,
+  //   completed: 0,
+  //   total: 0,
+  //   status: '',
+  //   targetFolder: '',
+  //   currentFile: '',
+  //   frameExtractionStatus: ''
+  // })
 
   // 辅助函数：获取文件类型配置
   const getFileTypeConfig = (component: string) => {
@@ -215,16 +215,16 @@ export function FileUpload() {
 
 
   // 重置上传进度
-  const resetUploadProgress = () => {
-    uploadProgress.show = false
-    uploadProgress.percentage = 0
-    uploadProgress.completed = 0
-    uploadProgress.total = 0
-    uploadProgress.status = ''
-    uploadProgress.targetFolder = ''
-    uploadProgress.currentFile = ''
-    uploadProgress.frameExtractionStatus = ''
-  }
+  // const resetUploadProgress = () => {
+  //   uploadProgress.show = false
+  //   uploadProgress.percentage = 0
+  //   uploadProgress.completed = 0
+  //   uploadProgress.total = 0
+  //   uploadProgress.status = ''
+  //   uploadProgress.targetFolder = ''
+  //   uploadProgress.currentFile = ''
+  //   uploadProgress.frameExtractionStatus = ''
+  // }
 
   // 重置所有状态
   const resetAll = () => {
@@ -234,7 +234,6 @@ export function FileUpload() {
     extractAllFrames.value = false
     uploadConfig.customFolderName = ''
     uploading.value = false
-    resetUploadProgress()
   }
 
 
@@ -266,6 +265,11 @@ export function FileUpload() {
 
 
   const uploadFiles = async () => {
+    console.log('[uploadFiles] start', {
+      fileCount: fileList.value.length,
+      loggedIn: !!username.value,
+      fileType: uploadConfig.fileType,
+    })
     if (fileList.value.length === 0) {
       ElMessage.warning('请先选择文件')
       return
@@ -274,19 +278,11 @@ export function FileUpload() {
       ElMessage.error('请先登录，无法获取用户名')
       return
     }
-    
-    console.log('上传信息：', {
-      fileCount: fileList.value.length,
-      stage: uploadConfig.stage,
-      finalFolderName: finalFolderName.value,
-      fileType: uploadConfig.fileType
-    })
-    
+     
     uploading.value = true
     try {
-      const formData = new FormData() 
-
-      
+      // 显示进度卡片并初始化
+      const formData = new FormData()     
       // 添加文件
       fileList.value.forEach((file) => {
         if (file.raw) {
@@ -304,7 +300,6 @@ export function FileUpload() {
       
       // 添加上传类型，用于后端识别不同的上传组件
       formData.append('upload_type', uploadConfig.fileType)
-      
       //添加视频帧率提取参数（仅视频类型需要）
       if (uploadConfig.fileType === 'video') {
         if (extractAllFrames.value) {
@@ -316,9 +311,7 @@ export function FileUpload() {
 
 
       const response = await api.post('/upload/', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        }
+        headers: { 'Content-Type': 'multipart/form-data' }
       })
       if (response.data) {     
         ElMessage.success({
@@ -348,7 +341,7 @@ export function FileUpload() {
     extractAllFrames,
     folderName,
     uploading,
-    uploadProgress,
+    // uploadProgress,
     uploadConfig,
     dialogImageUrl,
     dialogVisible,
@@ -365,7 +358,6 @@ export function FileUpload() {
     handleSelectFile,
     getFileExtension,
     formatFileSize,
-    resetUploadProgress,
     convertToPreviewFormat,
     resetAll,
     getFileTypeConfig,

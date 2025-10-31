@@ -56,13 +56,6 @@ export function useFilePreview(props: Ref<FilePreviewProps>, emit: (event: 'sele
   const hasNextImage = computed(() => currentIndex.value < imageFiles.value.length - 1)
 
   // --- Methods ---
-  const formatFileSize = (bytes: number): string => {
-    if (bytes === 0) return '0 Bytes'
-    const k = 1024
-    const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB']
-    const i = Math.floor(Math.log(bytes) / Math.log(k))
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
-  }
 
   const loadFile = async (file: FileItem) => {
     loading.value = true
@@ -349,7 +342,6 @@ export function useFilePreview(props: Ref<FilePreviewProps>, emit: (event: 'sele
     hasNextImage,
     
     // Methods
-    formatFileSize,
     loadFile,
     retryLoad,
     handleImageError,
