@@ -1,3 +1,4 @@
+
 import os
 import torch
 from random import randint
@@ -11,6 +12,8 @@ from tqdm import tqdm
 from utils.image_utils import psnr
 from argparse import ArgumentParser, Namespace
 from arguments import ModelParams, PipelineParams, OptimizationParams
+from splatviz_network import SplatvizNetwork
+
 try:
     from torch.utils.tensorboard import SummaryWriter
     TENSORBOARD_FOUND = True
@@ -23,16 +26,9 @@ try:
 except:
     FUSED_SSIM_AVAILABLE = False
 
-try:
-    from diff_gaussian_rasterization import SparseGaussianAdam
-    SPARSE_ADAM_AVAILABLE = True
-except:
-    SPARSE_ADAM_AVAILABLE = False
 
-def training(dataset, opt, pipe, testing_iterations, saving_iterations, checkpoint_iterations, checkpoint, debug_from, enable_gui=True):
+def training(dataset, opt, pipe, testing_iterations, saving_iterations, checkpoint_iterations, checkpoint, debug_from):
 
-    if not SPARSE_ADAM_AVAILABLE and opt.optimizer_type == "sparse_adam":
-        sys.exit(f"Trying to use sparse adam but it is not installed, please install the correct rasterizer using pip install [3dgs_accel].")
 
     first_iter = 0
     tb_writer = prepare_output_and_logger(dataset)
@@ -45,10 +41,6 @@ def training(dataset, opt, pipe, testing_iterations, saving_iterations, checkpoi
 
     bg_color = [1, 1, 1] if dataset.white_background else [0, 0, 0]
     background = torch.tensor(bg_color, dtype=torch.float32, device="cuda")
-    
-    # Initialize network GUI for visualization
-    if enable_gui:
-        network_gui.init()
 
     iter_start = torch.cuda.Event(enable_timing = True)
     iter_end = torch.cuda.Event(enable_timing = True)
@@ -63,51 +55,26 @@ def training(dataset, opt, pipe, testing_iterations, saving_iterations, checkpoi
 
     progress_bar = tqdm(range(first_iter, opt.iterations), desc="Training progress")
     first_iter += 1
+    network = SplatvizNetwork()
     for iteration in range(first_iter, opt.iterations + 1):
-        # Network GUI handling
-        if enable_gui:
-            if network_gui.conn == None:
-                network_gui.try_connect()
-            
-            while network_gui.conn != None:
-                try:
-                    net_image_bytes = None
-                    custom_cam, do_training, pipe.convert_SHs_python, pipe.compute_cov3D_python, keep_alive, scaling_modifer = network_gui.receive()
-                    
-                    # Render custom camera view
-                    if custom_cam != None:
-                        net_image = render(custom_cam, gaussians, pipe, background, scaling_modifier=scaling_modifer, use_trained_exp=dataset.train_test_exp, separate_sh=SPARSE_ADAM_AVAILABLE)["render"]
-                        net_image_bytes = memoryview((torch.clamp(net_image, min=0, max=1.0) * 255).byte().permute(1, 2, 0).contiguous().cpu().numpy())
-                    
-                    # Send image to frontend
-                    if net_image_bytes is not None:
-                        # Get image dimensions
-                        if custom_cam is not None:
-                            network_gui.latest_width = custom_cam.image_width
-                            network_gui.latest_height = custom_cam.image_height
-                        network_gui.send(net_image_bytes, dataset.source_path)
-                    
-                    # Check if should continue training
-                    if do_training and ((iteration < int(opt.iterations)) or not keep_alive):
-                        break
-                    
-                    # If paused, wait for training signal
-                    if not do_training:
-                        import time
-                        time.sleep(0.01)  # Small delay to avoid busy waiting
-                        continue
-                        
-                except Exception as e:
-                    print(f"Network GUI error: {e}")
-                    import traceback
-                    traceback.print_exc()
-                    network_gui.conn = None
-
+        network.render(pipe, gaussians, ema_loss_for_log, render, background, iteration, opt)
+        # if network_gui.conn == None:
+        #     network_gui.try_connect()
+        # while network_gui.conn != None:
+        #     try:
+        #         net_image_bytes = None
+        #         custom_cam, do_training, pipe.convert_SHs_python, pipe.compute_cov3D_python, keep_alive, scaling_modifer = network_gui.receive()
+        #         if custom_cam != None:
+        #             net_image = render(custom_cam, gaussians, pipe, background, scaling_modifier=scaling_modifer, use_trained_exp=dataset.train_test_exp, separate_sh=SPARSE_ADAM_AVAILABLE)["render"]
+        #             net_image_bytes = memoryview((torch.clamp(net_image, min=0, max=1.0) * 255).byte().permute(1, 2, 0).contiguous().cpu().numpy())
+        #         network_gui.send(net_image_bytes, dataset.source_path)
+        #         if do_training and ((iteration < int(opt.iterations)) or not keep_alive):
+        #             break
+        #     except Exception as e:
+        #         network_gui.conn = None
         iter_start.record()
-
         gaussians.update_learning_rate(iteration)
 
-        # Every 1000 its we increase the levels of SH up to a maximum degree
         if iteration % 1000 == 0:
             gaussians.oneupSHdegree()
 
@@ -170,27 +137,8 @@ def training(dataset, opt, pipe, testing_iterations, saving_iterations, checkpoi
                 progress_bar.update(10)
             if iteration == opt.iterations:
                 progress_bar.close()
-            
-            # Send training statistics to network GUI
-            if enable_gui and network_gui.conn is not None:
-                stats = {
-                    "iteration": iteration,
-                    "num_gaussians": len(gaussians.get_xyz),
-                    "loss": ema_loss_for_log,
-                    "sh_degree": gaussians.active_sh_degree,
-                    "paused": network_gui.training_paused,
-                    "error": "",
-                    "train_params": {
-                        "densify_grad_threshold": opt.densify_grad_threshold,
-                        "densify_from_iter": opt.densify_from_iter,
-                        "densify_until_iter": opt.densify_until_iter,
-                        "densification_interval": opt.densification_interval,
-                        "opacity_reset_interval": opt.opacity_reset_interval,
-                    }
-                }
-                network_gui.send_stats(stats)
 
-            # Log and save
+        
             if (iteration in saving_iterations):
                 print("\n[ITER {}] Saving Gaussians".format(iteration))
                 scene.save(iteration)
@@ -238,6 +186,15 @@ def prepare_output_and_logger(args):
     with open(os.path.join(args.model_path, "cfg_args"), 'w') as cfg_log_f:
         cfg_log_f.write(str(Namespace(**vars(args))))
 
+    # Create Tensorboard writer
+    tb_writer = None
+    if TENSORBOARD_FOUND:
+        tb_writer = SummaryWriter(args.model_path)
+    else:
+        print("Tensorboard not available: not logging progress")
+    return tb_writer
+
+
 if __name__ == "__main__":
     # Set up command line argument parser
     parser = ArgumentParser(description="Training script parameters")
@@ -251,20 +208,12 @@ if __name__ == "__main__":
     parser.add_argument("--test_iterations", nargs="+", type=int, default=[7_000, 30_000])
     parser.add_argument("--save_iterations", nargs="+", type=int, default=[7_000, 30_000])
     parser.add_argument("--quiet", action="store_true")
-    parser.add_argument('--disable_viewer', action='store_true', default=False)
     parser.add_argument("--checkpoint_iterations", nargs="+", type=int, default=[])
     parser.add_argument("--start_checkpoint", type=str, default = None)
     args = parser.parse_args(sys.argv[1:])
     args.save_iterations.append(args.iterations)
-    
-    print("Optimizing " + args.model_path)
-
-    # Initialize system state (RNG)
     safe_state(args.quiet)
 
-
     torch.autograd.set_detect_anomaly(args.detect_anomaly)
-    training(lp.extract(args), op.extract(args), pp.extract(args), args.test_iterations, args.save_iterations, args.checkpoint_iterations, args.start_checkpoint, args.debug_from, enable_gui=not args.disable_viewer)
+    training(lp.extract(args), op.extract(args), pp.extract(args), args.test_iterations, args.save_iterations, args.checkpoint_iterations, args.start_checkpoint, args.debug_from)
 
-    # All done
-    print("\nTraining complete.")

@@ -1,14 +1,3 @@
-#
-# Copyright (C) 2023, Inria
-# GRAPHDECO research group, https://team.inria.fr/graphdeco
-# All rights reserved.
-#
-# This software is free for non-commercial, research and evaluation use 
-# under the terms of the LICENSE.md file.
-#
-# For inquiries contact  george.drettakis@inria.fr
-#
-
 import torch
 import math
 import numpy as np
@@ -68,6 +57,13 @@ def getProjectionMatrix(znear, zfar, fovX, fovY):
     P[3, 2] = z_sign
     P[2, 2] = z_sign * zfar / (zfar - znear)
     P[2, 3] = -(zfar * znear) / (zfar - znear)
+    return P
+
+def getProjectionMatrixCustom(fx, fy, W, H, cx, cy):
+    P = torch.zeros(4, 4)
+    P[0, 0] = fx
+    P[1, 1] = fy
+    P[3, 2] = 1
     return P
 
 def fov2focal(fov, pixels):

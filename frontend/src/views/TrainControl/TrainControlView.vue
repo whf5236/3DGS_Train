@@ -2,11 +2,7 @@
   <div class="train-control-container">
     <div class="header">
       <h2>3D Gaussian Splatting - 训练控制</h2>
-      <div class="status-indicator" :class="{ connected: isConnected, error: connectionError }">
-        <span v-if="isConnected" class="status-text">● 已连接</span>
-        <span v-else-if="connectionError" class="status-text">● 连接错误</span>
-        <span v-else class="status-text">● 未连接</span>
-      </div>
+
     </div>
 
     <div class="content">
@@ -58,10 +54,7 @@
         
         <!-- 性能监控组件 -->
         <PerformanceWidget />
-        
-        <!-- 代码编辑器组件 -->
-        <EditWidget />
-        
+             
         <!-- 评估工具组件 -->
         <EvalWidget />
         
@@ -82,11 +75,10 @@ import CameraControl from './components/CameraControl.vue'
 import TrainingWidget from './components/TrainingWidget.vue'
 import RenderWidget from './components/RenderWidget.vue'
 import PerformanceWidget from './components/PerformanceWidget.vue'
-import EditWidget from './components/EditWidget.vue'
 import EvalWidget from './components/EvalWidget.vue'
 import SaveWidget from './components/SaveWidget.vue'
 import VideoWidget from './components/VideoWidget.vue'
-
+import type { CameraParams } from '@/utils/Control'
 // Template refs
 const glcanvas = ref<HTMLCanvasElement | null>(null)
 
@@ -106,14 +98,7 @@ const {
 provide('trainControl', trainControl)
 
 // Camera parameters
-interface CameraParams {
-  fov: number
-  pose: { yaw: number; pitch: number }
-  cameraMatrix: number[][]
-  lookatPoint: { x: number; y: number; z: number }
-  upVector: { x: number; y: number; z: number }
-  cameraMode: string
-}
+
 
 // Handle camera parameter updates
 function handleCameraUpdate(params: CameraParams) {
@@ -176,8 +161,6 @@ onUnmounted(() => {
 
 .header {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
   margin-bottom: 20px;
   padding: 20px;
   background: rgba(255, 255, 255, 0.1);
@@ -242,8 +225,8 @@ onUnmounted(() => {
 
 .render-canvas {
   flex: 1;
-  max-width: 70%;
-  height: 600px;
+  max-width: 80%;
+  height: 70vh;
   border: 2px solid rgba(255, 255, 255, 0.2);
   border-radius: 15px;
   background-color: #000;

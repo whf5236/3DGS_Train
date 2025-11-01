@@ -104,7 +104,6 @@ async def handle_client(websocket, path):
     global conn, current_message, training_paused, single_step, stop_at_value, render_grad
     global latest_width, latest_height, latest_image_bytes, latest_stats
     
-    print(f"Client connected from {websocket.remote_address}")
     conn = websocket
     
     try:

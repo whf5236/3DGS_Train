@@ -57,7 +57,6 @@ class WebSocketService {
         this.ws = new WebSocket(wsUrl)
         
         this.ws.onopen = () => {
-          console.log('WebSocket连接已建立')
           this.isConnected.value = true
           this.isConnecting.value = false
           this.reconnectAttempts = 0
